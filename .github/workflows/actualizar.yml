@@ -19,113 +19,160 @@ jobs:
       - name: Generar lista IPTV
         run: |
           python - <<'PY'
+          import json
           import urllib.request
 
-          fuentes = [
-              ("Nicaragua", "https://iptv-org.github.io/iptv/countries/ni.m3u"),
-              ("Centroamérica", "https://iptv-org.github.io/iptv/regions/cenamer.m3u"),
-              ("Latinoamérica", "https://iptv-org.github.io/iptv/regions/latam.m3u")
-          ]
+          API = "https://iptv-org.github.io/api"
 
-          canales = []
-          urls = set()
+          def descargar(url):
+              req = urllib.request.Request(
+                  url,
+                  headers={"User-Agent": "Mozilla/5.0"}
+              )
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  return json.loads(r.read().decode("utf-8"))
 
-          for grupo, fuente in fuentes:
-              print("Descargando:", grupo)
+          print("Descargando canales...")
+          channels = descargar(API + "/channels.json")
 
-              try:
-                  datos = urllib.request.urlopen(
-                      fuente,
-                      timeout=60
-                  ).read().decode("utf-8")
+          print("Descargando streams...")
+          streams = descargar(API + "/streams.json")
 
-                  lineas = datos.splitlines()
-
-                  i = 0
-
-                  while i < len(lineas):
-                      linea = lineas[i]
-
-                      if linea.startswith("#EXTINF:"):
-                          info = linea
-                          url = None
-
-                          j = i + 1
-
-                          while j < len(lineas):
-                              siguiente = lineas[j].strip()
-
-                              if siguiente.startswith("http://") or siguiente.startswith("https://"):
-                                  url = siguiente
-                                  break
-
-                              if siguiente.startswith("#EXTINF:"):
-                                  break
-
-                              j += 1
-
-                          if url and url not in urls:
-                              urls.add(url)
-
-                              # Agregar grupo personalizado
-                              info = info.replace(
-                                  'group-title="',
-                                  'group-title="'
-                              )
-
-                              if 'group-title="' in info:
-                                  inicio = info.find('group-title="') + 13
-                                  fin = info.find('"', inicio)
-
-                                  if fin != -1:
-                                      info = (
-                                          info[:inicio]
-                                          + grupo
-                                          + " / "
-                                          + info[inicio:fin]
-                                          + info[fin:]
-                                      )
-                              else:
-                                  info = info.replace(
-                                      "#EXTINF:-1",
-                                      '#EXTINF:-1 group-title="' + grupo + '"'
-                                  )
-
-                              canales.append((grupo, info, url))
-
-                      i += 1
-
-              except Exception as e:
-                  print("Error:", fuente, e)
-
-          # Ordenar: Nicaragua primero, luego Centroamérica y Latinoamérica
-          orden = {
-              "Nicaragua": 0,
-              "Centroamérica": 1,
-              "Latinoamérica": 2
+          # Países que queremos
+          paises = {
+              "ni": "🇳🇮 Nicaragua",
+              "hn": "🇭🇳 Honduras",
+              "sv": "🇸🇻 El Salvador",
+              "gt": "🇬🇹 Guatemala",
+              "cr": "🇨🇷 Costa Rica",
+              "pa": "🇵🇦 Panamá",
+              "bz": "🇧🇿 Belice",
+              "mx": "🇲🇽 México",
+              "co": "🇨🇴 Colombia",
+              "ve": "🇻🇪 Venezuela",
+              "ec": "🇪🇨 Ecuador",
+              "pe": "🇵🇪 Perú",
+              "bo": "🇧🇴 Bolivia",
+              "cl": "🇨🇱 Chile",
+              "ar": "🇦🇷 Argentina",
+              "uy": "🇺🇾 Uruguay",
+              "py": "🇵🇾 Paraguay",
+              "do": "🇩🇴 República Dominicana",
+              "cu": "🇨🇺 Cuba"
           }
 
-          canales.sort(key=lambda x: (orden.get(x[0], 99), x[1].lower()))
+          canales_validos = {}
+
+          for stream in streams:
+              channel_id = stream.get("channel")
+
+              if not channel_id:
+                  continue
+
+              # Ignorar streams marcados como geobloqueados
+              labels = stream.get("labels") or []
+
+              if "Geo-blocked" in labels:
+                  continue
+
+              url = stream.get("url")
+
+              if not url:
+                  continue
+
+              canales_validos.setdefault(channel_id, []).append(stream)
+
+          resultado = []
+
+          for canal in channels:
+              channel_id = canal.get("id")
+
+              if channel_id not in canales_validos:
+                  continue
+
+              pais = None
+
+              for codigo in paises:
+                  if codigo in (canal.get("country") or "").lower().split(";"):
+                      pais = codigo
+                      break
+
+              if not pais:
+                  continue
+
+              streams_canal = canales_validos[channel_id]
+
+              # Elegir el stream con mayor calidad disponible
+              streams_canal.sort(
+                  key=lambda x: (
+                      1 if x.get("quality") else 0,
+                      x.get("quality") or ""
+                  ),
+                  reverse=True
+              )
+
+              stream = streams_canal[0]
+
+              nombre = (
+                  stream.get("title")
+                  or canal.get("name")
+                  or channel_id
+              )
+
+              url = stream.get("url")
+
+              logo = canal.get("logo") or ""
+              calidad = stream.get("quality") or ""
+
+              grupo = paises[pais]
+
+              info = '#EXTINF:-1'
+
+              if logo:
+                  info += f' tvg-logo="{logo}"'
+
+              info += f' group-title="{grupo}"'
+
+              if calidad:
+                  nombre += f" ({calidad})"
+
+              info += f',{nombre}'
+
+              resultado.append((pais, nombre.lower(), info, url))
+
+          # Ordenar por país y nombre
+          resultado.sort(key=lambda x: (x[0], x[1]))
+
+          # Eliminar URLs duplicadas
+          urls = set()
 
           with open("playlist.m3u", "w", encoding="utf-8") as archivo:
-              archivo.write("#EXTM3U\n\n")
+              archivo.write("#EXTM3U\n")
 
-              for grupo, info, url in canales:
+              for pais, nombre, info, url in resultado:
+                  if url in urls:
+                      continue
+
+                  urls.add(url)
+
                   archivo.write(info + "\n")
                   archivo.write(url + "\n")
 
           print("================================")
-          print("Canales únicos:", len(canales))
+          print("CANALES GENERADOS:", len(urls))
           print("================================")
           PY
 
-      - name: Guardar cambios
+      - name: Guardar playlist
         run: |
           git config user.name "IPTV Bot"
           git config user.email "actions@github.com"
 
           git add playlist.m3u
 
-          git diff --cached --quiet || git commit -m "Actualizar lista IPTV"
-
-          git push
+          if git diff --cached --quiet; then
+            echo "No hay cambios"
+          else
+            git commit -m "Actualizar canales IPTV"
+            git push
+          fi

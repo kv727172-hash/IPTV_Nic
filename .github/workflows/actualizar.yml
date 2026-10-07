@@ -1,9 +1,9 @@
-name: Actualizar IPTV
+name: Actualizar playlist IPTV
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,63 +16,156 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Generar lista IPTV
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generar playlist
+        shell: python
         run: |
-          python - <<'PY'
           import json
           import urllib.request
+          import urllib.error
+          import socket
+          from collections import defaultdict
 
-          API = "https://iptv-org.github.io/api"
+          CHANNELS_URL = "https://iptv-org.github.io/api/channels.json"
+          STREAMS_URL = "https://iptv-org.github.io/api/streams.json"
+
+          print("Descargando información de IPTV-org...")
 
           def descargar(url):
               req = urllib.request.Request(
                   url,
-                  headers={"User-Agent": "Mozilla/5.0"}
+                  headers={
+                      "User-Agent": "Mozilla/5.0"
+                  }
               )
               with urllib.request.urlopen(req, timeout=60) as r:
                   return json.loads(r.read().decode("utf-8"))
 
-          print("Descargando canales...")
-          channels = descargar(API + "/channels.json")
+          channels = descargar(CHANNELS_URL)
+          streams = descargar(STREAMS_URL)
 
-          print("Descargando streams...")
-          streams = descargar(API + "/streams.json")
+          print(f"Canales encontrados: {len(channels)}")
+          print(f"Streams encontrados: {len(streams)}")
+
+          # Información de canales
+          channel_info = {
+              c["id"]: c
+              for c in channels
+              if c.get("id")
+          }
 
           # Países que queremos
           paises = {
               "ni": "🇳🇮 Nicaragua",
-              "hn": "🇭🇳 Honduras",
               "sv": "🇸🇻 El Salvador",
+              "hn": "🇭🇳 Honduras",
               "gt": "🇬🇹 Guatemala",
               "cr": "🇨🇷 Costa Rica",
               "pa": "🇵🇦 Panamá",
-              "bz": "🇧🇿 Belice",
               "mx": "🇲🇽 México",
               "co": "🇨🇴 Colombia",
               "ve": "🇻🇪 Venezuela",
               "ec": "🇪🇨 Ecuador",
               "pe": "🇵🇪 Perú",
-              "bo": "🇧🇴 Bolivia",
               "cl": "🇨🇱 Chile",
               "ar": "🇦🇷 Argentina",
               "uy": "🇺🇾 Uruguay",
               "py": "🇵🇾 Paraguay",
+              "bo": "🇧🇴 Bolivia",
               "do": "🇩🇴 República Dominicana",
-              "cu": "🇨🇺 Cuba"
+              "pr": "🇵🇷 Puerto Rico"
           }
 
-          canales_validos = {}
+          # Timeout corto para no tardar demasiado
+          socket.setdefaulttimeout(8)
+
+          def probar_stream(url):
+              """
+              Comprueba que el servidor entregue datos.
+              No intenta saltarse geobloqueos ni autenticación.
+              """
+
+              try:
+                  req = urllib.request.Request(
+                      url,
+                      headers={
+                          "User-Agent": "Mozilla/5.0"
+                      }
+                  )
+
+                  with urllib.request.urlopen(req, timeout=8) as response:
+
+                      codigo = response.status
+                      content_type = response.headers.get(
+                          "Content-Type", ""
+                      ).lower()
+
+                      if codigo < 200 or codigo >= 400:
+                          return False
+
+                      # Leer una pequeña cantidad de datos
+                      datos = response.read(2048)
+
+                      if not datos:
+                          return False
+
+                      # HLS normalmente contiene #EXTM3U
+                      if ".m3u8" in url.lower():
+                          if b"#EXTM3U" in datos:
+                              return True
+
+                      # Para otros streams basta comprobar
+                      # que el servidor entregue contenido.
+                      return True
+
+              except Exception:
+                  return False
+
+          # Agrupar streams por canal
+          streams_por_canal = defaultdict(list)
 
           for stream in streams:
+
               channel_id = stream.get("channel")
 
               if not channel_id:
                   continue
 
-              # Ignorar streams marcados como geobloqueados
+              if channel_id not in channel_info:
+                  continue
+
+              # No utilizar streams que IPTV-org marca como
+              # bloqueados/geobloqueados.
               labels = stream.get("labels") or []
 
-              if "Geo-blocked" in labels:
+              labels_text = " ".join(
+                  str(x).lower()
+                  for x in labels
+              )
+
+              if any(x in labels_text for x in [
+                  "geo-blocked",
+                  "geoblocked",
+                  "blocked",
+                  "timeout",
+                  "error"
+              ]):
+                  continue
+
+              # Algunos registros antiguos pueden tener status
+              status = str(
+                  stream.get("status", "")
+              ).lower()
+
+              if status in [
+                  "blocked",
+                  "timeout",
+                  "error"
+              ]:
                   continue
 
               url = stream.get("url")
@@ -80,99 +173,162 @@ jobs:
               if not url:
                   continue
 
-              canales_validos.setdefault(channel_id, []).append(stream)
+              streams_por_canal[channel_id].append(stream)
 
-          resultado = []
+          print("Streams candidatos:", sum(
+              len(v) for v in streams_por_canal.values()
+          ))
 
-          for canal in channels:
-              channel_id = canal.get("id")
+          # Playlist final
+          playlist = [
+              "#EXTM3U"
+          ]
 
-              if channel_id not in canales_validos:
+          usados = set()
+          canales_ok = 0
+          streams_ok = 0
+
+          # Ordenar por país y nombre
+          candidatos = []
+
+          for channel_id, lista in streams_por_canal.items():
+
+              canal = channel_info[channel_id]
+
+              pais = str(
+                  canal.get("country", "")
+              ).lower()
+
+              if pais not in paises:
                   continue
 
-              pais = None
+              candidatos.append(
+                  (pais, canal, lista)
+              )
 
-              for codigo in paises:
-                  if codigo in (canal.get("country") or "").lower().split(";"):
-                      pais = codigo
-                      break
+          candidatos.sort(
+              key=lambda x: (
+                  x[0],
+                  x[1].get("name", "")
+              )
+          )
 
-              if not pais:
-                  continue
+          for pais, canal, lista in candidatos:
 
-              streams_canal = canales_validos[channel_id]
+              nombre = canal.get(
+                  "name",
+                  channel_id
+              )
 
-              # Elegir el stream con mayor calidad disponible
-              streams_canal.sort(
-                  key=lambda x: (
-                      1 if x.get("quality") else 0,
-                      x.get("quality") or ""
+              # Ordenar streams:
+              # primero mayor calidad
+              lista.sort(
+                  key=lambda s: (
+                      s.get("quality") or "",
+                      s.get("url") or ""
                   ),
                   reverse=True
               )
 
-              stream = streams_canal[0]
+              stream_valido = None
 
-              nombre = (
-                  stream.get("title")
-                  or canal.get("name")
-                  or channel_id
+              # Probar cada stream hasta encontrar uno funcional
+              for stream in lista:
+
+                  url = stream.get("url")
+
+                  if not url:
+                      continue
+
+                  if url in usados:
+                      continue
+
+                  print(
+                      f"Probando: {nombre} -> {url}"
+                  )
+
+                  if probar_stream(url):
+                      stream_valido = stream
+                      break
+
+              if not stream_valido:
+                  print(
+                      f"DESCARTADO: {nombre}"
+                  )
+                  continue
+
+              url = stream_valido["url"]
+
+              usados.add(url)
+
+              calidad = (
+                  stream_valido.get("quality")
+                  or ""
               )
 
-              url = stream.get("url")
+              # Crear título
+              titulo = nombre
 
-              logo = canal.get("logo") or ""
-              calidad = stream.get("quality") or ""
+              if calidad:
+                  titulo = f"{nombre} ({calidad})"
 
               grupo = paises[pais]
 
-              info = '#EXTINF:-1'
+              playlist.append(
+                  f'#EXTINF:-1 tvg-id="{channel_id}" '
+                  f'group-title="{grupo}",{titulo}'
+              )
 
-              if logo:
-                  info += f' tvg-logo="{logo}"'
+              # Usar headers públicos solamente si IPTV-org
+              # los declara para ese stream.
+              referrer = stream_valido.get("referrer")
+              user_agent = stream_valido.get("user_agent")
 
-              info += f' group-title="{grupo}"'
+              if referrer:
+                  playlist.append(
+                      f"#EXTVLCOPT:http-referrer={referrer}"
+                  )
 
-              if calidad:
-                  nombre += f" ({calidad})"
+              if user_agent:
+                  playlist.append(
+                      f"#EXTVLCOPT:http-user-agent={user_agent}"
+                  )
 
-              info += f',{nombre}'
+              playlist.append(url)
 
-              resultado.append((pais, nombre.lower(), info, url))
+              streams_ok += 1
+              canales_ok += 1
 
-          # Ordenar por país y nombre
-          resultado.sort(key=lambda x: (x[0], x[1]))
+          # Guardar
+          with open(
+              "playlist.m3u",
+              "w",
+              encoding="utf-8"
+          ) as f:
+              f.write(
+                  "\n".join(playlist)
+                  + "\n"
+              )
 
-          # Eliminar URLs duplicadas
-          urls = set()
+          print("")
+          print("==============================")
+          print("PLAYLIST GENERADA")
+          print("==============================")
+          print(f"Canales activos: {canales_ok}")
+          print(f"Streams activos: {streams_ok}")
+          print(f"URLs únicas: {len(usados)}")
+          print("==============================")
 
-          with open("playlist.m3u", "w", encoding="utf-8") as archivo:
-              archivo.write("#EXTM3U\n")
-
-              for pais, nombre, info, url in resultado:
-                  if url in urls:
-                      continue
-
-                  urls.add(url)
-
-                  archivo.write(info + "\n")
-                  archivo.write(url + "\n")
-
-          print("================================")
-          print("CANALES GENERADOS:", len(urls))
-          print("================================")
-          PY
-
-      - name: Guardar playlist
+      - name: Guardar cambios
         run: |
-          git config user.name "IPTV Bot"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add playlist.m3u
 
           if git diff --cached --quiet; then
-            echo "No hay cambios"
+            echo "No hubo cambios."
           else
-            git commit -m "Actualizar canales IPTV"
+            git commit -m "Actualizar playlist - streams activos"
             git push
           fi

@@ -16,60 +16,116 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Crear playlist
+      - name: Generar lista IPTV
         run: |
           python - <<'PY'
           import urllib.request
 
-          listas = [
-              "https://iptv-org.github.io/iptv/countries/ni.m3u",
-              "https://iptv-org.github.io/iptv/regions/cenamer.m3u",
-              "https://iptv-org.github.io/iptv/regions/latam.m3u"
+          fuentes = [
+              ("Nicaragua", "https://iptv-org.github.io/iptv/countries/ni.m3u"),
+              ("Centroamérica", "https://iptv-org.github.io/iptv/regions/cenamer.m3u"),
+              ("Latinoamérica", "https://iptv-org.github.io/iptv/regions/latam.m3u")
           ]
 
-          entradas = []
+          canales = []
           urls = set()
 
-          for lista in listas:
+          for grupo, fuente in fuentes:
+              print("Descargando:", grupo)
+
               try:
-                  datos = urllib.request.urlopen(lista, timeout=60).read().decode("utf-8")
-                  partes = datos.split("#EXTINF:")
-                  
-                  for parte in partes[1:]:
-                      bloque = "#EXTINF:" + parte
-                      lineas = bloque.splitlines()
+                  datos = urllib.request.urlopen(
+                      fuente,
+                      timeout=60
+                  ).read().decode("utf-8")
 
-                      if not lineas:
-                          continue
+                  lineas = datos.splitlines()
 
-                      url = None
+                  i = 0
 
-                      for linea in reversed(lineas):
-                          linea = linea.strip()
-                          if linea.startswith("http://") or linea.startswith("https://"):
-                              url = linea
-                              break
+                  while i < len(lineas):
+                      linea = lineas[i]
 
-                      if url and url not in urls:
-                          urls.add(url)
-                          entradas.append(bloque.rstrip())
+                      if linea.startswith("#EXTINF:"):
+                          info = linea
+                          url = None
+
+                          j = i + 1
+
+                          while j < len(lineas):
+                              siguiente = lineas[j].strip()
+
+                              if siguiente.startswith("http://") or siguiente.startswith("https://"):
+                                  url = siguiente
+                                  break
+
+                              if siguiente.startswith("#EXTINF:"):
+                                  break
+
+                              j += 1
+
+                          if url and url not in urls:
+                              urls.add(url)
+
+                              # Agregar grupo personalizado
+                              info = info.replace(
+                                  'group-title="',
+                                  'group-title="'
+                              )
+
+                              if 'group-title="' in info:
+                                  inicio = info.find('group-title="') + 13
+                                  fin = info.find('"', inicio)
+
+                                  if fin != -1:
+                                      info = (
+                                          info[:inicio]
+                                          + grupo
+                                          + " / "
+                                          + info[inicio:fin]
+                                          + info[fin:]
+                                      )
+                              else:
+                                  info = info.replace(
+                                      "#EXTINF:-1",
+                                      '#EXTINF:-1 group-title="' + grupo + '"'
+                                  )
+
+                              canales.append((grupo, info, url))
+
+                      i += 1
 
               except Exception as e:
-                  print("Error:", lista, e)
+                  print("Error:", fuente, e)
+
+          # Ordenar: Nicaragua primero, luego Centroamérica y Latinoamérica
+          orden = {
+              "Nicaragua": 0,
+              "Centroamérica": 1,
+              "Latinoamérica": 2
+          }
+
+          canales.sort(key=lambda x: (orden.get(x[0], 99), x[1].lower()))
 
           with open("playlist.m3u", "w", encoding="utf-8") as archivo:
-              archivo.write("#EXTM3U\n")
-              archivo.write("\n".join(entradas))
-              archivo.write("\n")
+              archivo.write("#EXTM3U\n\n")
 
-          print("Canales encontrados:", len(entradas))
+              for grupo, info, url in canales:
+                  archivo.write(info + "\n")
+                  archivo.write(url + "\n")
+
+          print("================================")
+          print("Canales únicos:", len(canales))
+          print("================================")
           PY
 
-      - name: Guardar playlist
+      - name: Guardar cambios
         run: |
           git config user.name "IPTV Bot"
           git config user.email "actions@github.com"
+
           git add playlist.m3u
+
           git diff --cached --quiet || git commit -m "Actualizar lista IPTV"
+
           git push
-        

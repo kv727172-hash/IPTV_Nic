@@ -1,0 +1,75 @@
+name: Actualizar IPTV
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Crear playlist
+        run: |
+          python - <<'PY'
+          import urllib.request
+
+          listas = [
+              "https://iptv-org.github.io/iptv/countries/ni.m3u",
+              "https://iptv-org.github.io/iptv/regions/cenamer.m3u",
+              "https://iptv-org.github.io/iptv/regions/latam.m3u"
+          ]
+
+          entradas = []
+          urls = set()
+
+          for lista in listas:
+              try:
+                  datos = urllib.request.urlopen(lista, timeout=60).read().decode("utf-8")
+                  partes = datos.split("#EXTINF:")
+                  
+                  for parte in partes[1:]:
+                      bloque = "#EXTINF:" + parte
+                      lineas = bloque.splitlines()
+
+                      if not lineas:
+                          continue
+
+                      url = None
+
+                      for linea in reversed(lineas):
+                          linea = linea.strip()
+                          if linea.startswith("http://") or linea.startswith("https://"):
+                              url = linea
+                              break
+
+                      if url and url not in urls:
+                          urls.add(url)
+                          entradas.append(bloque.rstrip())
+
+              except Exception as e:
+                  print("Error:", lista, e)
+
+          with open("playlist.m3u", "w", encoding="utf-8") as archivo:
+              archivo.write("#EXTM3U\n")
+              archivo.write("\n".join(entradas))
+              archivo.write("\n")
+
+          print("Canales encontrados:", len(entradas))
+          PY
+
+      - name: Guardar playlist
+        run: |
+          git config user.name "IPTV Bot"
+          git config user.email "actions@github.com"
+          git add playlist.m3u
+          git diff --cached --quiet || git commit -m "Actualizar lista IPTV"
+          git push
+        

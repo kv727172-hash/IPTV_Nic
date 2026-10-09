@@ -21,8 +21,6 @@ https://origin.dpsgo.com/ssai/event/p4mmBxEzSmKAxY1GusOHrw/master.m3u8
 https://origin.dpsgo.com/ssai/event/g7_JOM0ORki9SR5RKHe-Kw/master.m3u8
 #EXTINF:-1 tvg-id="13T.cl" tvg-name="13T" tvg-logo="" group-title="LATAM - CL",13T
 https://origin.dpsgo.com/ssai/event/f4TrySe8SoiGF8Lu3EIq1g/master.m3u8
-#EXTINF:-1 tvg-id="15TV.mx" tvg-name="15TV" tvg-logo="" group-title="LATAM - MX",15TV
-https://servilive.com:3380/live/v3n6thy7glive.m3u8
 #EXTINF:-1 tvg-id="24Horas.cl" tvg-name="24 Horas" tvg-logo="" group-title="LATAM - CL",24 Horas
 http://187.102.208.209:8000/play/a0a1/index.m3u8
 #EXTINF:-1 tvg-id="36TVHuacho.pe" tvg-name="36 TV Huacho" tvg-logo="" group-title="LATAM - PE",36 TV Huacho
@@ -37,8 +35,8 @@ https://panel.host-live.com:19360/cn247tv/cn247tv.m3u8
 https://acceso.mediosdecostarica.com:3638/live/360rftvcrlive.m3u8
 #EXTINF:-1 tvg-id="A7TV.do" tvg-name="A7 TV" tvg-logo="" group-title="LATAM - DO",A7 TV
 https://183.bozztv.com/ssh101/ssh101/a7tvjarabacoa/playlist.m3u8
-#EXTINF:-1 tvg-id="ABCTeleshow.pe" tvg-name="ABC Teleshow" tvg-logo="" group-title="LATAM - PE",ABC Teleshow
-https://live-evg10.tv360.bitel.com.pe/bitel/abctv/playlist.m3u8
+#EXTINF:-1 tvg-id="A24.ar" tvg-name="A24" tvg-logo="" group-title="LATAM - AR",A24
+http://138.59.227.20:8000/play/a05u/index.m3u8
 #EXTINF:-1 tvg-id="AbejalesTV.ve" tvg-name="AbejalesTV" tvg-logo="" group-title="LATAM - VE",AbejalesTV
 https://183.bozztv.com/giatv/giatv-AbejalesTV/AbejalesTV/playlist.m3u8
 #EXTINF:-1 tvg-id="ABTelevision.pe" tvg-name="ABTelevision" tvg-logo="" group-title="LATAM - PE",ABTelevision
@@ -65,8 +63,6 @@ https://tls-cl.cdnz.cl/aeradio/live/playlist.m3u8
 https://5fc584f3f19c9.streamlock.net/agape/smil:agape.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="AgapeTV.sv" tvg-name="Agape TV" tvg-logo="" group-title="LATAM - SV",Agape TV
 https://5fc584f3f19c9.streamlock.net/agape/videoagape/chunklist_w153454298.m3u8
-#EXTINF:-1 tvg-id="AGRFMTV.py" tvg-name="AGR FM TV" tvg-logo="" group-title="LATAM - PY",AGR FM TV
-https://tigocloud.desdeparaguay.net/agrtv/agrtv/playlist.m3u8
 #EXTINF:-1 tvg-id="AgriculturaTV.cl" tvg-name="Agricultura TV" tvg-logo="" group-title="LATAM - CL",Agricultura TV
 https://redirector.rudo.video/hls-video/ey6283je82983je9823je8jowowiekldk9838274/921tv/921tv.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="AgroCanal.br" tvg-name="AgroCanal" tvg-logo="" group-title="LATAM - BR",AgroCanal
@@ -77,8 +73,6 @@ http://168.197.104.22/AGRO_CANAL/index.m3u8
 http://170.83.49.66:8083/AGROCANALHD/index.m3u8
 #EXTINF:-1 tvg-id="AgroCanal.br" tvg-name="AgroCanal" tvg-logo="" group-title="LATAM - BR",AgroCanal
 http://186.219.52.187/agro_canal/index.m3u8
-#EXTINF:-1 tvg-id="AgroCanal.br" tvg-name="AgroCanal" tvg-logo="" group-title="LATAM - BR",AgroCanal
-https://aovivo.equipea.com.br:5443/aovivort/streams/pshRLrnv6isXq7RG4747567774043229.m3u8
 #EXTINF:-1 tvg-id="AgroMais.br" tvg-name="AgroMais" tvg-logo="" group-title="LATAM - BR",AgroMais
 http://45.162.64.114/AGROMAIS/index.m3u8
 #EXTINF:-1 tvg-id="AgroMais.br" tvg-name="AgroMais" tvg-logo="" group-title="LATAM - BR",AgroMais
@@ -131,10 +125,6 @@ https://play.agenciastreaming.com:8081/tvalturalimalive/video.m3u8
 https://viewhn.com/amagatelevision/sdfUYWKegHKRPpSirG/playlist.m3u8
 #EXTINF:-1 tvg-id="AmazoniaTV.pe" tvg-name="Amazonia TV" tvg-logo="" group-title="LATAM - PE",Amazonia TV
 https://servilive.com:3199/live/amazoniatvlive.m3u8
-#EXTINF:-1 tvg-id="AmazonicaTV.pe" tvg-name="Amazonica TV" tvg-logo="" group-title="LATAM - PE",Amazonica TV
-https://live-evg8.tv360.bitel.com.pe/bitel/amazonicatvSRT/playlist.m3u8
-#EXTINF:-1 tvg-id="AmazonicaTV.pe" tvg-name="Amazonica TV" tvg-logo="" group-title="LATAM - PE",Amazonica TV
-https://videoserver.tmcreativos.com:19360/amazonicatv/amazonicatv.m3u8
 #EXTINF:-1 tvg-id="AmazonSat.br" tvg-name="Amazon Sat" tvg-logo="" group-title="LATAM - BR",Amazon Sat
 https://amazonsat.brasilstream.com.br/hls/amazonsat/index.m3u8
 #EXTINF:-1 tvg-id="AMCanal.cl" tvg-name="AM Canal" tvg-logo="" group-title="LATAM - CL",AM Canal
@@ -181,8 +171,6 @@ https://hls.tvabierta.net/hls/021.m3u8
 https://video1.azulstream.com:8081/antenaseistv/index.m3u8
 #EXTINF:-1 tvg-id="AntenaSUR.pe" tvg-name="Antena SUR" tvg-logo="" group-title="LATAM - PE",Antena SUR
 https://cloudpro.servidoresdestream.com:8081/8010/index.m3u8
-#EXTINF:-1 tvg-id="AntenaSUR.pe" tvg-name="Antena SUR" tvg-logo="" group-title="LATAM - PE",Antena SUR
-https://live-evg8.tv360.bitel.com.pe/bitel/antenasurtv/playlist.m3u8
 #EXTINF:-1 tvg-id="AntenaTV.mx" tvg-name="Antena TV" tvg-logo="" group-title="LATAM - MX",Antena TV
 https://5ca9af4645e15.streamlock.net/grd/videogrd/playlist.m3u8
 #EXTINF:-1 tvg-id="AntenaUnoRadiovideo.ec" tvg-name="Antena Uno Radiovideo" tvg-logo="" group-title="LATAM - EC",Antena Uno Radiovideo
@@ -225,8 +213,6 @@ https://v2.tustreaming.cl/atacamanoticias/index.m3u8
 https://v2.tustreaming.cl/atacamatv/tracks-v1a1/mono.ts.m3u8
 #EXTINF:-1 tvg-id="AtacamaTV.cl" tvg-name="Atacama TV" tvg-logo="" group-title="LATAM - CL",Atacama TV
 https://v2.tustreaming.cl/atacamatv/index.m3u8
-#EXTINF:-1 tvg-id="AtlantisRadioTV.pe" tvg-name="Atlantis Radio TV" tvg-logo="" group-title="LATAM - PE",Atlantis Radio TV
-https://live-evg8.tv360.bitel.com.pe/bitel/atlantisSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="ATV.pe" tvg-name="ATV" tvg-logo="" group-title="LATAM - PE",ATV
 https://d19e55ehz2il4i.cloudfront.net/ts:abr.m3u8
 #EXTINF:-1 tvg-id="ATV.pe" tvg-name="ATV" tvg-logo="" group-title="LATAM - PE",ATV
@@ -358,6 +344,8 @@ https://cdn.jmvstream.com/w/LVW-9375/LVW9375_6i0wPBCHYc/playlist.m3u8
 #EXTINF:-1 tvg-id="BocaChicaTV.do" tvg-name="Boca Chica TV" tvg-logo="" group-title="LATAM - DO",Boca Chica TV
 https://fox.hostlagarto.com:8081/bocachicatv/tracks-v1a1/mono.m3u8
 #EXTINF:-1 tvg-id="BoliviaTV.bo" tvg-name="Bolivia TV" tvg-logo="" group-title="LATAM - BO",Bolivia TV
+https://hls.tvabierta.net/hls/boliviatv.m3u8
+#EXTINF:-1 tvg-id="BoliviaTV.bo" tvg-name="Bolivia TV" tvg-logo="" group-title="LATAM - BO",Bolivia TV
 http://190.181.61.93:8000/play/a001/index.m3u8
 #EXTINF:-1 tvg-id="BonaoTV.do" tvg-name="Bonao TV" tvg-logo="" group-title="LATAM - DO",Bonao TV
 https://tele-stream.telecasa.net/live/st2/bonaotv-hd/index.m3u8
@@ -367,8 +355,6 @@ https://5790d294af2dc.streamlock.net/latinostv/latinostv/playlist.m3u8
 https://edge.essastream.com/borealtelevision/tracks-v1a1/mono.m3u8
 #EXTINF:-1 tvg-id="BoxKidsTV.br" tvg-name="Box Kids TV" tvg-logo="" group-title="LATAM - BR",Box Kids TV
 http://170.83.49.66:8083/BOXKIDSHD/index.m3u8
-#EXTINF:-1 tvg-id="BR8TV.br" tvg-name="BR8 TV" tvg-logo="" group-title="LATAM - BR",BR8 TV
-https://cdn.live.br1.jmvstream.com/w/LVW-11668/ngrp:LVW11668_wiJpjbMrks_all/playlist.m3u8
 #EXTINF:-1 tvg-id="BragadoTV.ar" tvg-name="Bragado TV" tvg-logo="" group-title="LATAM - AR",Bragado TV
 https://vivo.solumedia.com:19360/bragadato/bragadato.m3u8
 #EXTINF:-1 tvg-id="BrunoMasiTV.py" tvg-name="Bruno Masi TV" tvg-logo="" group-title="LATAM - PY",Bruno Masi TV
@@ -395,8 +381,6 @@ http://181.78.211.244:8005/play/a09u/index.m3u8
 http://arcast.net:1935/cadena103/cadena103/playlist.m3u8
 #EXTINF:-1 tvg-id="Cadena103TV.ar" tvg-name="Cadena103.TV" tvg-logo="" group-title="LATAM - AR",Cadena103.TV
 https://streamlov.alsolnet.com/cadena103/live/playlist.m3u8
-#EXTINF:-1 tvg-id="CadenaA.bo" tvg-name="Cadena A" tvg-logo="" group-title="LATAM - BO",Cadena A
-https://5fe2654d6127d.streamlock.net/cadenaa/videocadenaa/playlist.m3u8
 #EXTINF:-1 tvg-id="CadenaTV.pe" tvg-name="Cadena TV" tvg-logo="" group-title="LATAM - PE",Cadena TV
 https://tv.bitstreaming.net:3789/live/cdntvlive.m3u8
 #EXTINF:-1 tvg-id="CadenaTV.pe" tvg-name="Cadena TV" tvg-logo="" group-title="LATAM - PE",Cadena TV
@@ -451,6 +435,8 @@ https://cloud2.streaminglivehd.com:2020/hls/8036/8036.m3u8
 https://live20.bozztv.com/giatv/giatv-KMKTV/KMKTV/chunks.m3u8
 #EXTINF:-1 tvg-id="Canal3LaPampa.ar" tvg-name="Canal 3 La Pampa" tvg-logo="" group-title="LATAM - AR",Canal 3 La Pampa
 https://stream.arcast.com.ar/c3lapampa/ngrp:c3lapampa_all/playlist.m3u8
+#EXTINF:-1 tvg-id="Canal3LasHeras.ar" tvg-name="Canal 3 Las Heras" tvg-logo="" group-title="LATAM - AR",Canal 3 Las Heras
+https://stream.arcast.com.ar/canal3/canal3/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal3Pinamar.ar" tvg-name="Canal 3 Pinamar" tvg-logo="" group-title="LATAM - AR",Canal 3 Pinamar
 http://intelincloud01.com.ar/hls/cn3/index.m3u8
 #EXTINF:-1 tvg-id="Canal3Tacural.ar" tvg-name="Canal 3 Tacural" tvg-logo="" group-title="LATAM - AR",Canal 3 Tacural
@@ -467,8 +453,6 @@ https://iptv.ixfo.com.ar:30443/live/C4POS/playlist.m3u8
 http://190.128.214.97:64333/play/a06l/index.m3u8
 #EXTINF:-1 tvg-id="Canal4RD.do" tvg-name="Canal 4 RD" tvg-logo="" group-title="LATAM - DO",Canal 4 RD
 https://cdn.protvradiostream.com/canal4rd-1/ngrp:canal4rd-1_all/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal4SanJuan.ar" tvg-name="Canal 4 San Juan" tvg-logo="" group-title="LATAM - AR",Canal 4 San Juan
-https://streamlov.alsolnet.com/canal4sanjuan/live/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal4Teleaire.ar" tvg-name="Canal 4 Teleaire" tvg-logo="" group-title="LATAM - AR",Canal 4 Teleaire
 https://stmvideo6.livecastv.com/canal4/canal4/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal4VillaDolores.ar" tvg-name="Canal 4 Villa Dolores" tvg-logo="" group-title="LATAM - AR",Canal 4 Villa Dolores
@@ -481,8 +465,6 @@ http://132.255.210.69:8000/play/a06e
 http://45.5.118.152:8000/play/a03i/index.m3u8
 #EXTINF:-1 tvg-id="Canal5DelPueblo.ar" tvg-name="Canal 5 Del Pueblo" tvg-logo="" group-title="LATAM - AR",Canal 5 Del Pueblo
 https://stmv4.voxtvhd.com.br/canal5pueblo/canal5pueblo/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal5ElLider.hn" tvg-name="Canal 5 El Lider" tvg-logo="" group-title="LATAM - HN",Canal 5 El Lider
-https://mdstrm.com/live-stream-playlist/6287fda8ea3b8b397d1ca2ed.m3u8
 #EXTINF:-1 tvg-id="Canal5ElLider.hn" tvg-name="Canal 5 El Lider" tvg-logo="" group-title="LATAM - HN",Canal 5 El Lider
 http://186.33.26.18:8000/play/a0s4/index.m3u8
 #EXTINF:-1 tvg-id="Canal5PuertoMontt.cl" tvg-name="Canal 5 Puerto Montt" tvg-logo="" group-title="LATAM - CL",Canal 5 Puerto Montt
@@ -544,11 +526,7 @@ https://acceso.mediosdecostarica.com:3606/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="Canal10.ni" tvg-name="Canal 10" tvg-logo="" group-title="LATAM - NI",Canal 10
 https://www.canal10.com.ni/envivo
 #EXTINF:-1 tvg-id="Canal10.sv" tvg-name="Canal 10" tvg-logo="" group-title="LATAM - SV",Canal 10
-https://5ca3e84a76d30.streamlock.net/tves/videotves/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal10.sv" tvg-name="Canal 10" tvg-logo="" group-title="LATAM - SV",Canal 10
 http://45.167.2.101:8000/play/a0r8/index.m3u8
-#EXTINF:-1 tvg-id="Canal10Durango.mx" tvg-name="Canal 10 Durango" tvg-logo="" group-title="LATAM - MX",Canal 10 Durango
-https://5e50264bd6766.streamlock.net/canal10durango/videocanal10durango/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal11.cr" tvg-name="Canal 11" tvg-logo="" group-title="LATAM - CR",Canal 11
 http://45.5.117.188:8000/play/a02w/index.m3u8
 #EXTINF:-1 tvg-id="Canal11.gt" tvg-name="Canal 11" tvg-logo="" group-title="LATAM - GT",Canal 11
@@ -579,8 +557,6 @@ http://168.196.127.137:6001/play/a064/index.m3u8
 https://tv91.hostingnuclear.com:19360/intercable/intercable.m3u8
 #EXTINF:-1 tvg-id="Canal13LaRioja.ar" tvg-name="Canal 13 La Rioja" tvg-logo="" group-title="LATAM - AR",Canal 13 La Rioja
 http://arcast.net:1935/mp/mp/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal14Codazzi.co" tvg-name="Canal 14 Codazzi" tvg-logo="" group-title="LATAM - CO",Canal 14 Codazzi
-https://eu1.servers10.com:8081/8056/index.m3u8
 #EXTINF:-1 tvg-id="Canal17RTVD.do" tvg-name="Canal 17 RTVD" tvg-logo="" group-title="LATAM - DO",Canal 17 RTVD
 https://cdn.protvradiostream.com/rtvd17/ngrp:rtvd17_all/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal21Huancayo.pe" tvg-name="Canal 21 Huancayo" tvg-logo="" group-title="LATAM - PE",Canal 21 Huancayo
@@ -593,8 +569,6 @@ https://stmv2.voxtvhd.com.br/canal21/canal21/playlist.m3u8
 https://iptv.ixfo.com.ar:30443/c21tv/hd/c21tv/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal22Nacional.mx" tvg-name="Canal 22 Nacional" tvg-logo="" group-title="LATAM - MX",Canal 22 Nacional
 https://5fc584f3f19c9.streamlock.net/canal22/smil:canal22.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="Canal25Ayacucho.pe" tvg-name="Canal 25 Ayacucho" tvg-logo="" group-title="LATAM - PE",Canal 25 Ayacucho
-https://live-evg10.tv360.bitel.com.pe/bitel/canal25ayacucho/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal25Jundiai.br" tvg-name="Canal 25 Jundiai" tvg-logo="" group-title="LATAM - BR",Canal 25 Jundiai
 https://stream01.msolutionbrasil.com.br/hls/canal25/live.m3u8
 #EXTINF:-1 tvg-id="Canal26.ar" tvg-name="Canal 26" tvg-logo="" group-title="LATAM - AR",Canal 26
@@ -617,8 +591,6 @@ https://5e50264bd6766.streamlock.net/canal442/videocanal442/playlist.m3u8
 https://online.coopmorteros.coop/canal50/vivo.m3u8
 #EXTINF:-1 tvg-id="Canal56QuieroTV.bo" tvg-name="Canal 56 Quiero TV" tvg-logo="" group-title="LATAM - BO",Canal 56 Quiero TV
 http://45.5.118.152:8000/play/a08z/index.m3u8
-#EXTINF:-1 tvg-id="Canal70.do" tvg-name="Canal 70" tvg-logo="" group-title="LATAM - DO",Canal 70
-https://183.bozztv.com/giatv/giatv-cnal70tv/cnal70tv/playlist.m3u8
 #EXTINF:-1 tvg-id="Canal79LaCosta.ar" tvg-name="Canal 79 La Costa" tvg-logo="" group-title="LATAM - AR",Canal 79 La Costa
 https://streamconex.com:19360/lacosta/lacosta.m3u8
 #EXTINF:-1 tvg-id="Canal79MardelPlata.ar" tvg-name="Canal 79 Mar del Plata" tvg-logo="" group-title="LATAM - AR",Canal 79 Mar del Plata
@@ -639,8 +611,6 @@ http://138.121.15.230:9002/CANAL-CAPITAL/index.m3u8
 http://200.122.223.13:55000/play/canal-capital-banda-ku/index.m3u8
 #EXTINF:-1 tvg-id="CanalCatorce.do" tvg-name="Canal Catorce" tvg-logo="" group-title="LATAM - DO",Canal Catorce
 https://stream.haislin.com/14tv/index.m3u8
-#EXTINF:-1 tvg-id="CanalCHD.co" tvg-name="Canal CHD" tvg-logo="" group-title="LATAM - CO",Canal CHD
-https://vs20.live.opencaster.com/canalchd2025_8d99626c/index.m3u8
 #EXTINF:-1 tvg-id="CanalChilote.cl" tvg-name="Canal Chilote" tvg-logo="" group-title="LATAM - CL",Canal Chilote
 https://videostream.chileservidores.com:8081/chiloe2/index.m3u8
 #EXTINF:-1 tvg-id="CanalCineDios.co" tvg-name="Canal Cine Dios" tvg-logo="" group-title="LATAM - CO",Canal Cine Dios
@@ -723,12 +693,6 @@ https://videostream.chileservidores.com:8081/latina/index.m3u8
 https://v2.tustreaming.cl/canallocalcl/index.m3u8
 #EXTINF:-1 tvg-id="CanalMas.uy" tvg-name="Canal Mas" tvg-logo="" group-title="LATAM - UY",Canal Mas
 https://canalmasuruguay.com/hls/master-abr.m3u8
-#EXTINF:-1 tvg-id="CanalMasTelevision.co" tvg-name="Canal Mas Television" tvg-logo="" group-title="LATAM - CO",Canal Mas Television
-https://movil.ejeserver.com/live/teledoradahd.m3u8
-#EXTINF:-1 tvg-id="CanalMasTelevision.co" tvg-name="Canal Mas Television" tvg-logo="" group-title="LATAM - CO",Canal Mas Television
-https://video.ejeserver.com/live/teledoradahd.m3u8
-#EXTINF:-1 tvg-id="CanalMasTV.pe" tvg-name="Canal Mas TV" tvg-logo="" group-title="LATAM - PE",Canal Mas TV
-https://live-evg11.tv360.bitel.com.pe/bitel/mastvSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="CanalMetropolitanodeNoticias.br" tvg-name="Canal Metropolitano de Noticias" tvg-logo="" group-title="LATAM - BR",Canal Metropolitano de Noticias
 https://stmv5.samcast.com.br/claudio8701/claudio8701/playlist.m3u8
 #EXTINF:-1 tvg-id="CANALMTelevision.pe" tvg-name="CANAL M Television" tvg-logo="" group-title="LATAM - PE",CANAL M Television
@@ -783,6 +747,8 @@ http://200.122.223.13:55000/play/rcn-hd-tdt/index.m3u8
 http://170.83.49.66:8083/CANALRURALHD/index.m3u8
 #EXTINF:-1 tvg-id="CanalRural.br" tvg-name="Canal Rural" tvg-logo="" group-title="LATAM - BR",Canal Rural
 http://186.219.52.187/canal_rural/index.m3u8
+#EXTINF:-1 tvg-id="CanalSete.br" tvg-name="Canal Sete" tvg-logo="" group-title="LATAM - BR",Canal Sete
+http://play.canalsete.com.br:1935/canalsete/xpl-c7_source/playlist.m3u8
 #EXTINF:-1 tvg-id="CanalShowsport.ar" tvg-name="Canal Showsport" tvg-logo="" group-title="LATAM - AR",Canal Showsport
 https://livestream.lumpentv.com.ar/hls/lumpen.m3u8
 #EXTINF:-1 tvg-id="CanalSurvisionAlerce.cl" tvg-name="Canal Survision Alerce" tvg-logo="" group-title="LATAM - CL",Canal Survision Alerce
@@ -799,8 +765,6 @@ http://181.78.211.244:8005/play/a08c/index.m3u8
 http://181.78.82.130:8000/play/a0o1/index.m3u8
 #EXTINF:-1 tvg-id="CanalTRO.co" tvg-name="Canal TRO" tvg-logo="" group-title="LATAM - CO",Canal TRO
 http://138.94.3.106:8000/play/a07i/index.m3u8
-#EXTINF:-1 tvg-id="CanalTRV.sv" tvg-name="Canal TRV" tvg-logo="" group-title="LATAM - SV",Canal TRV
-https://stream.ontvmx.com/ontv/CNMLXR0Z6FPtGdjcI4/playlist.m3u8
 #EXTINF:-1 tvg-id="CanalTV3.co" tvg-name="Canal TV3" tvg-logo="" group-title="LATAM - CO",Canal TV3
 https://streaming.telenetdigital.net.co:8086/canal3tv/stream.m3u8
 #EXTINF:-1 tvg-id="CanalTVRadioMayaTGBA.gt" tvg-name="Canal TV Radio Maya TGBA" tvg-logo="" group-title="LATAM - GT",Canal TV Radio Maya TGBA
@@ -809,8 +773,6 @@ https://s.emisoras.tv:8081/radiomaya/index.m3u8
 https://videostream.shockmedia.com.ar/hls/canaluniversidadmdp/canaluniversidadmdp.m3u8
 #EXTINF:-1 tvg-id="CanalUOL.br" tvg-name="Canal UOL" tvg-logo="" group-title="LATAM - BR",Canal UOL
 https://video24.mais.uol.com.br/live/6146.m3u8
-#EXTINF:-1 tvg-id="CanalWomtv.co" tvg-name="Canal Womtv" tvg-logo="" group-title="LATAM - CO",Canal Womtv
-https://live.amelbatv.co:81/womtvlive/index.m3u8
 #EXTINF:-1 tvg-id="CanangaTV.do" tvg-name="Cananga TV" tvg-logo="" group-title="LATAM - DO",Cananga TV
 https://cdn.streamingcpanel.com:3545/live/canangatlive.m3u8
 #EXTINF:-1 tvg-id="CandelitaTV.pr" tvg-name="Candelita TV" tvg-logo="" group-title="LATAM - PR",Candelita TV
@@ -839,8 +801,6 @@ http://168.196.127.137:6001/play/a09m/index.m3u8
 http://200.115.120.1:8000/play/ca067/index.m3u8
 #EXTINF:-1 tvg-id="CaracolInternacional.co" tvg-name="Caracol Internacional" tvg-logo="" group-title="LATAM - CO",Caracol Internacional
 http://190.123.76.22:8002/play/a06j/index.m3u8
-#EXTINF:-1 tvg-id="CaracolInternacional.co" tvg-name="Caracol Internacional" tvg-logo="" group-title="LATAM - CO",Caracol Internacional
-http://132.255.210.69:8000/play/a049/index.m3u8
 #EXTINF:-1 tvg-id="CaracolTV.co" tvg-name="Caracol TV" tvg-logo="" group-title="LATAM - CO",Caracol TV
 http://138.121.15.230:9002/CARACOL/index.m3u8
 #EXTINF:-1 tvg-id="CaracolTV.co" tvg-name="Caracol TV" tvg-logo="" group-title="LATAM - CO",Caracol TV
@@ -895,8 +855,6 @@ https://ss2.tvrdomi.com:1936/cascaratv/cascaratv/playlist.m3u8
 https://live-evg7.tv360.bitel.com.pe/bitel/casmatvSRT-TRA/playlist.m3u8
 #EXTINF:-1 tvg-id="CatamarcaTV.ar" tvg-name="Catamarca TV" tvg-logo="" group-title="LATAM - AR",Catamarca TV
 https://stream.arcast.com.ar/canal7catamarca/ngrp:canal7catamarca_all/playlist.m3u8?DVR=
-#EXTINF:-1 tvg-id="CatatumboTV.ve" tvg-name="Catatumbo TV" tvg-logo="" group-title="LATAM - VE",Catatumbo TV
-https://cloud.fastchannel.es/manifiest/hls/prog9/catatumbotv.m3u8
 #EXTINF:-1 tvg-id="CAtv.pr" tvg-name="CAtv" tvg-logo="" group-title="LATAM - PR",CAtv
 https://video2.getstreamhosting.com:19360/8216/8216.m3u8
 #EXTINF:-1 tvg-id="CBTVMichoacan.mx" tvg-name="CB TV Michoacan" tvg-logo="" group-title="LATAM - MX",CB TV Michoacan
@@ -911,8 +869,6 @@ http://190.61.90.17:40000/play/a03p/index.m3u8
 http://187.245.231.226:8000/play/a0ss/index.m3u8
 #EXTINF:-1 tvg-id="CDNDeportes.do" tvg-name="CDN Deportes" tvg-logo="" group-title="LATAM - DO",CDN Deportes
 https://hls.tvabierta.net/hls/036.m3u8
-#EXTINF:-1 tvg-id="CEACOMTV.bo" tvg-name="CEACOM TV" tvg-logo="" group-title="LATAM - BO",CEACOM TV
-https://eu1.servers10.com:8081/ceacom/index.m3u8
 #EXTINF:-1 tvg-id="CeltaTV.ar" tvg-name="Celta TV" tvg-logo="" group-title="LATAM - AR",Celta TV
 https://vivo.solumedia.com:19360/celta/celta.m3u8
 #EXTINF:-1 tvg-id="CenovisionHD.do" tvg-name="Cenovision HD" tvg-logo="" group-title="LATAM - DO",Cenovision HD
@@ -935,8 +891,6 @@ http://45.70.201.81:8000/play/a00p/index.m3u8
 https://v2.tustreaming.cl/chilechannel/index.m3u8
 #EXTINF:-1 tvg-id="ChileVision.cl" tvg-name="ChileVision" tvg-logo="" group-title="LATAM - CL",ChileVision
 http://15.204.246.24:8080/CHVHD/index.m3u8
-#EXTINF:-1 tvg-id="ChiloeRed25.cl" tvg-name="Chiloe Red 25" tvg-logo="" group-title="LATAM - CL",Chiloe Red 25
-https://v2.tustreaming.cl/chiloered/index.m3u8
 #EXTINF:-1 tvg-id="ChinaChannel.cl" tvg-name="China Channel" tvg-logo="" group-title="LATAM - CL",China Channel
 https://v2.tustreaming.cl/chinachannel/index.m3u8
 #EXTINF:-1 tvg-id="ChinolaTV.do" tvg-name="Chinola TV" tvg-logo="" group-title="LATAM - DO",Chinola TV
@@ -1017,8 +971,12 @@ https://cloudvideo.servers10.com:8081/latinchaneltv/index.m3u8
 https://movil.ejeserver.com/live/cncsantander.m3u8
 #EXTINF:-1 tvg-id="CNCSantanderdeQuilichao.co" tvg-name="CNC Santander de Quilichao" tvg-logo="" group-title="LATAM - CO",CNC Santander de Quilichao
 https://video.ejeserver.com/live/cncsantander.m3u8
+#EXTINF:-1 tvg-id="CNCTulua.co" tvg-name="CNC Tulua" tvg-logo="" group-title="LATAM - CO",CNC Tulua
+https://live.amelbatv.co:81/cnctulualive/index.fmp4.m3u8
 #EXTINF:-1 tvg-id="CNCValledupar.co" tvg-name="CNC Valledupar" tvg-logo="" group-title="LATAM - CO",CNC Valledupar
 https://live20.bozztv.com/akamaissh101/ssh101/cncvalledupar1/playlist.m3u8
+#EXTINF:-1 tvg-id="CNNChile.cl" tvg-name="CNN Chile" tvg-logo="" group-title="LATAM - CL",CNN Chile
+http://190.110.96.238:8000/play/a0f5/index.m3u8
 #EXTINF:-1 tvg-id="CNTMasTV.do" tvg-name="CNT Mas TV" tvg-logo="" group-title="LATAM - DO",CNT Mas TV
 https://edge.essastream.com/cntmas/tracks-v1a1/mono.m3u8
 #EXTINF:-1 tvg-id="COCOTV.do" tvg-name="COCO TV" tvg-logo="" group-title="LATAM - DO",COCO TV
@@ -1081,8 +1039,6 @@ https://video0.rogohosting.com:19360/8006/8006.m3u8
 https://cloudvideo.servers10.com:8081/8030/index.m3u8
 #EXTINF:-1 tvg-id="CotubanamaTV.do" tvg-name="Cotubanama TV" tvg-logo="" group-title="LATAM - DO",Cotubanama TV
 https://host.streamingnation.live/p/3588/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="CoyhaiqueTV.cl" tvg-name="Coyhaique TV" tvg-logo="" group-title="LATAM - CL",Coyhaique TV
-https://v2.tustreaming.cl/coyhaiquetv/index.m3u8
 #EXTINF:-1 tvg-id="CreaLaTV.mx" tvg-name="CreaLaTV" tvg-logo="" group-title="LATAM - MX",CreaLaTV
 https://stream.crealatv.com/live.m3u8
 #EXTINF:-1 tvg-id="Cristovision.co" tvg-name="Cristovision" tvg-logo="" group-title="LATAM - CO",Cristovision
@@ -1255,8 +1211,6 @@ https://avm.ecuamedia.net/educatv/live/playlist.m3u8
 https://stmv3.voxtvhd.com.br/conex2/conex2/playlist.m3u8
 #EXTINF:-1 tvg-id="El3deConce.cl" tvg-name="El 3 de Conce" tvg-logo="" group-title="LATAM - CL",El 3 de Conce
 https://5ff3d9babae13.streamlock.net/xedkektnqj/xedkektnqj/playlist.m3u8
-#EXTINF:-1 tvg-id="ElCaminoTV.sv" tvg-name="El Camino TV" tvg-logo="" group-title="LATAM - SV",El Camino TV
-https://5d32e2b9b7eed.streamlock.net:4443/ectv/ectv/playlist.m3u8
 #EXTINF:-1 tvg-id="ElCanalFeliz.cl" tvg-name="El Canal Feliz" tvg-logo="" group-title="LATAM - CL",El Canal Feliz
 http://streaming.multicontenidos.cl:8081/live/canalfeliz/playlist.m3u8
 #EXTINF:-1 tvg-id="ElCentroTV.cl" tvg-name="El Centro TV" tvg-logo="" group-title="LATAM - CL",El Centro TV
@@ -1285,6 +1239,8 @@ https://stream.soporteccrtv.xyz/live/elimtv/main_stream.m3u8
 https://movil.ejeserver.com/live/elmundodelcampo.m3u8
 #EXTINF:-1 tvg-id="ElNueve.ar" tvg-name="El Nueve" tvg-logo="" group-title="LATAM - AR",El Nueve
 http://15.204.246.24:8080/elnueveHD/index.m3u8
+#EXTINF:-1 tvg-id="ElNuevoDiarioTV.do" tvg-name="El Nuevo Diario TV" tvg-logo="" group-title="LATAM - DO",El Nuevo Diario TV
+https://nuevodiario01.streamprolive.com/hls/live.m3u8
 #EXTINF:-1 tvg-id="ElPinguinoTV.cl" tvg-name="El Pinguino TV" tvg-logo="" group-title="LATAM - CL",El Pinguino TV
 https://redirector.dps.live/hls/pinguinotv/playlist.m3u8
 #EXTINF:-1 tvg-id="ElPuertoTV.do" tvg-name="El Puerto TV" tvg-logo="" group-title="LATAM - DO",El Puerto TV
@@ -1310,11 +1266,11 @@ https://104florencia.co/wp-admin/admin-ajax.php?action=frp_hls_proxy&url=https:/
 #EXTINF:-1 tvg-id="EmocionTV.cl" tvg-name="Emocion TV" tvg-logo="" group-title="LATAM - CL",Emocion TV
 https://v1.tustreaming.cl/emociontv/index.m3u8
 #EXTINF:-1 tvg-id="Encuentro.ar" tvg-name="Encuentro" tvg-logo="" group-title="LATAM - AR",Encuentro
+http://138.59.227.20:8000/play/a05s/index.m3u8
+#EXTINF:-1 tvg-id="Encuentro.ar" tvg-name="Encuentro" tvg-logo="" group-title="LATAM - AR",Encuentro
 http://190.128.214.97:64333/play/a014/index.m3u8
 #EXTINF:-1 tvg-id="EnfoqueDigitalTV.cl" tvg-name="Enfoque Digital TV" tvg-logo="" group-title="LATAM - CL",Enfoque Digital TV
 https://5eaccbab48461.streamlock.net:1936/8074/8074/playlist.m3u8
-#EXTINF:-1 tvg-id="Enlace.cr" tvg-name="Enlace" tvg-logo="" group-title="LATAM - CR",Enlace
-https://livecdn.enlace.plus/enlace/smil:enlace-hd.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="Enlace.cr" tvg-name="Enlace" tvg-logo="" group-title="LATAM - CR",Enlace
 http://177.234.247.66:9975/Enlace/index.m3u8
 #EXTINF:-1 tvg-id="Enlace.cr" tvg-name="Enlace" tvg-logo="" group-title="LATAM - CR",Enlace
@@ -1333,8 +1289,6 @@ http://200.115.120.1:8000/play/ca114/index.m3u8
 http://45.5.117.57:8999/play/a01c/index.m3u8
 #EXTINF:-1 tvg-id="Enlace.cr" tvg-name="Enlace" tvg-logo="" group-title="LATAM - CR",Enlace
 http://201.207.54.159:8000/play/a0ea/index.m3u8
-#EXTINF:-1 tvg-id="EnlaceJuvenil.cr" tvg-name="Enlace Juvenil" tvg-logo="" group-title="LATAM - CR",Enlace Juvenil
-https://livecdnusa.enlace.plus/ejtv/smil:ejtv-hd.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="EnLineaMaule.cl" tvg-name="En Linea Maule" tvg-logo="" group-title="LATAM - CL",En Linea Maule
 https://v2.tustreaming.cl/enlineamauletv/index.m3u8
 #EXTINF:-1 tvg-id="Enntivision.do" tvg-name="Enntivision" tvg-logo="" group-title="LATAM - DO",Enntivision
@@ -1445,6 +1399,8 @@ https://mc.servidor.stream:19360/8274/8274.m3u8
 https://multimedia.fortalezatv.cl/video/video.m3u8
 #EXTINF:-1 tvg-id="FortalezaTVCueto.bo" tvg-name="Fortaleza TV Cueto" tvg-logo="" group-title="LATAM - BO",Fortaleza TV Cueto
 https://twitch-m3u8.bastypro112.workers.dev/tvfortalezacueto/index.m3u8
+#EXTINF:-1 tvg-id="FoxSports.ar" tvg-name="Fox Sports" tvg-logo="" group-title="LATAM - AR",Fox Sports
+http://138.59.227.20:8000/play/a085/index.m3u8
 #EXTINF:-1 tvg-id="FRATATV.do" tvg-name="FRATA TV" tvg-logo="" group-title="LATAM - DO",FRATA TV
 https://vdopanel.jlahozconsulting.com:3706/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="Frecuencia7TV.cl" tvg-name="Frecuencia 7 TV" tvg-logo="" group-title="LATAM - CL",Frecuencia 7 TV
@@ -1471,8 +1427,6 @@ https://streaming.grupomediosdelnorte.com:19360/galaxiateve/galaxiateve.m3u8
 http://45.224.97.181:9999/Gamavision/index.m3u8
 #EXTINF:-1 tvg-id="Gamavision.ec" tvg-name="Gamavision" tvg-logo="" group-title="LATAM - EC",Gamavision
 http://181.78.211.244:8000/play/a0a2/index.m3u8
-#EXTINF:-1 tvg-id="GarabitoTV.cr" tvg-name="Garabito TV" tvg-logo="" group-title="LATAM - CR",Garabito TV
-https://59ef525c24caa.streamlock.net/garabitoTV/garabitotv/playlist.m3u8
 #EXTINF:-1 tvg-id="GarageTVLatinAmerica.ar" tvg-name="Garage TV Latin America" tvg-logo="" group-title="LATAM - AR",Garage TV Latin America
 https://stream1.sersat.com/hls/garagetv.m3u8
 #EXTINF:-1 tvg-id="GaviotaTV.ec" tvg-name="Gaviota TV" tvg-logo="" group-title="LATAM - EC",Gaviota TV
@@ -1483,6 +1437,8 @@ https://amg00716-globo-amg00716c1-tcl-br-9495.playouts.now.amagi.tv/playlist.m3u
 https://dfr80qz435crc.cloudfront.net/EFGH/Amagi/Globo/GE_Fast_BR/GE_Fast.m3u8
 #EXTINF:-1 tvg-id="GenialTV.cl" tvg-name="Genial TV" tvg-logo="" group-title="LATAM - CL",Genial TV
 https://v1.tustreaming.cl/genialtv/index.m3u8
+#EXTINF:-1 tvg-id="GeniosTV.pe" tvg-name="Genios TV" tvg-logo="" group-title="LATAM - PE",Genios TV
+https://sc3.wasidata.com/Genios2_1902/video.m3u8
 #EXTINF:-1 tvg-id="GexTV.cr" tvg-name="Gex TV" tvg-logo="" group-title="LATAM - CR",Gex TV
 https://live20.bozztv.com/akamaissh101/ssh101/gextvaccess/playlist.m3u8
 #EXTINF:-1 tvg-id="GHTelevision.do" tvg-name="GH Television" tvg-logo="" group-title="LATAM - DO",GH Television
@@ -1493,6 +1449,8 @@ https://tv2.bitstreaming.net:3576/multi_live/play.m3u8
 https://pistream.ddns.net/hls/stream.m3u8
 #EXTINF:-1 tvg-id="GirasolTV.hn" tvg-name="Girasol TV" tvg-logo="" group-title="LATAM - HN",Girasol TV
 https://s.emisoras.tv:8081/girasoltv/index.m3u8
+#EXTINF:-1 tvg-id="GiTelevision.do" tvg-name="Gi Television" tvg-logo="" group-title="LATAM - DO",Gi Television
+https://canal.gitelevisionserver.com/live/DIEEFIh506fL8huspvl0f0c2PZF3/index.m3u8
 #EXTINF:-1 tvg-id="GlobalTV.pe" tvg-name="Global TV" tvg-logo="" group-title="LATAM - PE",Global TV
 http://190.93.224.42/GLOBAL/index.m3u8
 #EXTINF:-1 tvg-id="GlobalTV.pe" tvg-name="Global TV" tvg-logo="" group-title="LATAM - PE",Global TV
@@ -1531,6 +1489,10 @@ https://stmv1.srvif.com/gospelcartoon/gospelcartoon/playlist.m3u8
 https://stmv1.srvif.com/gospelf/gospelf/playlist.m3u8
 #EXTINF:-1 tvg-id="GOTV.py" tvg-name="GO TV" tvg-logo="" group-title="LATAM - PY",GO TV
 https://rds3.desdeparaguay.net/gotv/gotv/playlist.m3u8
+#EXTINF:-1 tvg-id="GrandeTV.ve" tvg-name="Grande TV" tvg-logo="" group-title="LATAM - VE",Grande TV
+https://live20.bozztv.com/akamaissh101/ssh101/grandetv2240/playlist.m3u8
+#EXTINF:-1 tvg-id="GrandeTV.ve" tvg-name="Grande TV" tvg-logo="" group-title="LATAM - VE",Grande TV
+https://vs20.live.opencaster.com/grande41_0b593479/index.m3u8
 #EXTINF:-1 tvg-id="GuaroTV.ve" tvg-name="Guaro TV" tvg-logo="" group-title="LATAM - VE",Guaro TV
 https://stream.guarotv.net:3592/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="Guatevision.gt" tvg-name="Guatevision" tvg-logo="" group-title="LATAM - GT",Guatevision
@@ -1581,8 +1543,6 @@ https://5fc584f3f19c9.streamlock.net/icrtvcolima/smil:icrtvcolima.smil/playlist.
 https://cloud37.ecuatel.com/iglesia2020/Stream1/playlist.m3u8
 #EXTINF:-1 tvg-id="IERTBCSCanal82.mx" tvg-name="IERTBCS Canal 8.2" tvg-logo="" group-title="LATAM - MX",IERTBCS Canal 8.2
 https://s5.mexside.net:1936/xhbzc82/xhbzc82/playlist.m3u8
-#EXTINF:-1 tvg-id="IglesiaDelCamino.gt" tvg-name="Iglesia Del Camino" tvg-logo="" group-title="LATAM - GT",Iglesia Del Camino
-http://streamingcontrol.com:1935/ectv/ectv/playlist.m3u8
 #EXTINF:-1 tvg-id="ILCECanal15SummaSaberes.mx" tvg-name="ILCE Canal 15 Summa Saberes" tvg-logo="" group-title="LATAM - MX",ILCE Canal 15 Summa Saberes
 https://live-ilce.ovp-vivaro.digital/ovp-origin-abr/ngrp:6359ef999f3fb_all/playlist.m3u8
 #EXTINF:-1 tvg-id="ImagenFM1051.hn" tvg-name="Imagen FM 105.1" tvg-logo="" group-title="LATAM - HN",Imagen FM 105.1
@@ -1599,8 +1559,6 @@ https://cloudvideo.servers10.com:8081/impactotv/index.m3u8
 https://igrejamundial.nuvemplay.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="ImperialTelevision.pe" tvg-name="Imperial Television" tvg-logo="" group-title="LATAM - PE",Imperial Television
 https://live-evg5.tv360.bitel.com.pe/bitel/imperialSRT/playlist.m3u8
-#EXTINF:-1 tvg-id="ImperialTV.bo" tvg-name="Imperial TV" tvg-logo="" group-title="LATAM - BO",Imperial TV
-https://tv.centaurychile.com/imperial/streams/EnCyCiwNLsqEQ2kv2852222720686498.m3u8
 #EXTINF:-1 tvg-id="InfinitaTV.ec" tvg-name="Infinita TV" tvg-logo="" group-title="LATAM - EC",Infinita TV
 https://s2.tvdatta.com:3753/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="InformeTV.do" tvg-name="Informe TV" tvg-logo="" group-title="LATAM - DO",Informe TV
@@ -1641,8 +1599,6 @@ https://video0.rogohosting.com:19360/sisjalisciense/sisjalisciense.m3u8
 https://tv.webmedialive.com/jbn_live/enlace/playlist.m3u8
 #EXTINF:-1 tvg-id="JBNTV.hn" tvg-name="JBN TV" tvg-logo="" group-title="LATAM - HN",JBN TV
 https://viewhn.com/jbn_live/enlace/playlist.m3u8
-#EXTINF:-1 tvg-id="JFVTV.sv" tvg-name="JFV TV" tvg-logo="" group-title="LATAM - SV",JFV TV
-https://2nbyj587d53k-hls-live.5centscdn.com/09/25b94ec89b2aa708c3c4ad0014b09845.sdp/playlist.m3u8
 #EXTINF:-1 tvg-id="JimaniTV.do" tvg-name="Jimani TV" tvg-logo="" group-title="LATAM - DO",Jimani TV
 https://cloud2.streaminglivehd.com:1936/8246/8246/playlist.m3u8
 #EXTINF:-1 tvg-id="JN19.pe" tvg-name="JN 19" tvg-logo="" group-title="LATAM - PE",JN 19
@@ -1671,16 +1627,14 @@ http://190.93.224.42/JUSTICIA-TV/index.m3u8
 http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/justicia.stream/playlist.m3u8
 #EXTINF:-1 tvg-id="KaluTV.co" tvg-name="Kalu TV" tvg-logo="" group-title="LATAM - CO",Kalu TV
 https://tv.kaludecolombia.com/memfs/d71c0104-4752-4690-bdbf-19aa849da6c4.m3u8
+#EXTINF:-1 tvg-id="KandelaTV.ve" tvg-name="KandelaTV" tvg-logo="" group-title="LATAM - VE",KandelaTV
+https://streamtv.intervenhosting.net:3718/live/kandelamedioslive.m3u8
 #EXTINF:-1 tvg-id="Karibena.pe" tvg-name="Karibena" tvg-logo="" group-title="LATAM - PE",Karibena
 https://iptv-pe-x-7-g3s-video.egostreaming.pe/karibenatv_685a-pe-a5676-584412/index.fmp4.m3u8
 #EXTINF:-1 tvg-id="KerussoTV.hn" tvg-name="Kerusso TV" tvg-logo="" group-title="LATAM - HN",Kerusso TV
 https://s.emisoras.tv:8081/kerussotv/index.m3u8
-#EXTINF:-1 tvg-id="KoraTV.pe" tvg-name="Kora TV" tvg-logo="" group-title="LATAM - PE",Kora TV
-https://s3.tvdatta.com:3700/live/jjrtvlive.m3u8
 #EXTINF:-1 tvg-id="KpopMix.ar" tvg-name="Kpop Mix" tvg-logo="" group-title="LATAM - AR",Kpop Mix
 https://cloud.tvomix.com/KPOPMIX/index.m3u8
-#EXTINF:-1 tvg-id="KpopTVPlay.br" tvg-name="KpopTV Play" tvg-logo="" group-title="LATAM - BR",KpopTV Play
-https://giatv.bozztv.com/giatv/giatv-kpoptvplay/kpoptvplay/playlist.m3u8
 #EXTINF:-1 tvg-id="L1Max.pe" tvg-name="L1 Max" tvg-logo="" group-title="LATAM - PE",L1 Max
 http://190.93.224.42/LIGA-1-MAX/index.m3u8
 #EXTINF:-1 tvg-id="La100.ar" tvg-name="La 100" tvg-logo="" group-title="LATAM - AR",La 100
@@ -1729,6 +1683,8 @@ https://tv.arkeo.cl:1936/enlacetv1/enlacetv1/playlist.m3u8
 https://latamvdo.com:3626/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="LaRed.cl" tvg-name="La Red" tvg-logo="" group-title="LATAM - CL",La Red
 https://tv-mgmt.gtd.cl/bpk-tv/LARED/default/index.m3u8
+#EXTINF:-1 tvg-id="LaReinaTV.do" tvg-name="La Reina TV" tvg-logo="" group-title="LATAM - DO",La Reina TV
+https://cloud2.streaminglivehd.com:1936/lareinatv/lareinatv/playlist.m3u8
 #EXTINF:-1 tvg-id="LaRutaTV.do" tvg-name="La Ruta TV" tvg-logo="" group-title="LATAM - DO",La Ruta TV
 https://streamunoapp.com:3983/live/larutatvlive.m3u8
 #EXTINF:-1 tvg-id="LasEstrellas.mx" tvg-name="Las Estrellas" tvg-logo="" group-title="LATAM - MX",Las Estrellas
@@ -1827,6 +1783,10 @@ https://5790d294af2dc.streamlock.net/manaclar/manaclar/playlist.m3u8
 https://play.once.net.ec/play/Ily2oYdd3E1fi9wK2zORoRovFU9P5xM0g3CNVK2MT0M/.m3u8
 #EXTINF:-1 tvg-id="MaquiTV.cl" tvg-name="Maqui TV" tvg-logo="" group-title="LATAM - CL",Maqui TV
 https://streamyes.alsolnet.com/maquiradio/live/playlist.m3u8
+#EXTINF:-1 tvg-id="MarayTV.cl" tvg-name="Maray TV" tvg-logo="" group-title="LATAM - CL",Maray TV
+https://5eaccbab48461.streamlock.net:1936/8242/ngrp:8242_all/playlist.m3u8
+#EXTINF:-1 tvg-id="MarcaTV.ec" tvg-name="Marca TV" tvg-logo="" group-title="LATAM - EC",Marca TV
+http://200.7.219.221:8088/live/livetv/index.m3u8
 #EXTINF:-1 tvg-id="MargaMargaTV.cl" tvg-name="Marga Marga TV" tvg-logo="" group-title="LATAM - CL",Marga Marga TV
 https://v1.tustreaming.cl/margamargatv/index.m3u8
 #EXTINF:-1 tvg-id="MariaVision.mx" tvg-name="Maria Vision" tvg-logo="" group-title="LATAM - MX",Maria Vision
@@ -1873,8 +1833,6 @@ http://45.5.118.152:8000/play/a03r/index.m3u8
 https://video.ejeserver.com/live/mcitelevision.m3u8
 #EXTINF:-1 tvg-id="MCNTelevision.gt" tvg-name="MCN Television" tvg-logo="" group-title="LATAM - GT",MCN Television
 https://eu1.servers10.com:8081/8338/index.m3u8
-#EXTINF:-1 tvg-id="MediaTV.pe" tvg-name="Media TV" tvg-logo="" group-title="LATAM - PE",Media TV
-https://live-evg5.tv360.bitel.com.pe/bitel/mediatv/playlist.m3u8
 #EXTINF:-1 tvg-id="Mega2.cl" tvg-name="Mega 2" tvg-logo="" group-title="LATAM - CL",Mega 2
 http://15.204.246.24:8080/Mega2HD/index.m3u8
 #EXTINF:-1 tvg-id="Mega2.cl" tvg-name="Mega 2" tvg-logo="" group-title="LATAM - CL",Mega 2
@@ -1911,8 +1869,6 @@ https://videostream.shockmedia.com.ar/hls/mercuriotv/mercuriotv.m3u8
 http://181.78.8.199:8000/play/a0fr/index.m3u8
 #EXTINF:-1 tvg-id="MetropoliMediosTV.ec" tvg-name="Metropoli Medios TV" tvg-logo="" group-title="LATAM - EC",Metropoli Medios TV
 https://eu1.servers10.com:8081/8214/index.m3u8
-#EXTINF:-1 tvg-id="MetropolitanadelCuzco.pe" tvg-name="Metropolitana del Cuzco" tvg-logo="" group-title="LATAM - PE",Metropolitana del Cuzco
-https://video1.earthcam.com/myearthcam/075ff02f78c35af55564cf3af3b3f750.flv/playlist.m3u8
 #EXTINF:-1 tvg-id="MetroTV.ar" tvg-name="Metro TV" tvg-logo="" group-title="LATAM - AR",Metro TV
 https://streamtv12.ddns.net:5443/LiveApp/streams/193945633734205616732920.m3u8
 #EXTINF:-1 tvg-id="MetroTV.hn" tvg-name="Metro TV" tvg-logo="" group-title="LATAM - HN",Metro TV
@@ -2061,8 +2017,6 @@ https://videohd.live:19360/8076/8076.m3u8
 https://ntvcanal7.com.ar:81/dash/stream.mpd
 #EXTINF:-1 tvg-id="Noticias16.do" tvg-name="Noticias 16" tvg-logo="" group-title="LATAM - DO",Noticias 16
 https://edge.essastream.com/noticias16/playlist.m3u8
-#EXTINF:-1 tvg-id="NotisurTV.do" tvg-name="Notisur TV" tvg-logo="" group-title="LATAM - DO",Notisur TV
-https://ss2.tvrdomi.com:1936/notisur/notisur/playlist.m3u8
 #EXTINF:-1 tvg-id="NovaEraTV.br" tvg-name="Nova Era TV" tvg-logo="" group-title="LATAM - BR",Nova Era TV
 http://wz3.dnip.com.br:1935/novaeratv/novaeratv.sdp/live.m3u8
 #EXTINF:-1 tvg-id="NovoTempo.br" tvg-name="Novo Tempo" tvg-logo="" group-title="LATAM - BR",Novo Tempo
@@ -2231,6 +2185,8 @@ https://oly-ftvpc.otteravision.com/oly/ftvpc/ftvpc.m3u8
 http://190.108.83.69:8000/play/a070/index.m3u8
 #EXTINF:-1 tvg-id="PopuTV.py" tvg-name="Popu TV" tvg-logo="" group-title="LATAM - PY",Popu TV
 https://copacogen.desdeparaguay.net/universotv/universotv_py_alta/playlist.m3u8?admin=nacion
+#EXTINF:-1 tvg-id="PortuguesaTelevision.ve" tvg-name="Portuguesa Television" tvg-logo="" group-title="LATAM - VE",Portuguesa Television
+https://streamtv.intervenhosting.net:3789/live/portutvlive.m3u8
 #EXTINF:-1 tvg-id="PowerHD.ar" tvg-name="PowerHD" tvg-logo="" group-title="LATAM - AR",PowerHD
 https://live2.tensila.com/1-1-1.power-tv/hls/master.m3u8
 #EXTINF:-1 tvg-id="PowerMaxRadioTV.ar" tvg-name="Power Max Radio TV" tvg-logo="" group-title="LATAM - AR",Power Max Radio TV
@@ -2311,16 +2267,12 @@ http://204.199.3.2/.m3u8
 https://streamlov.alsolnet.com/grupocentrobo/live/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioChalaca.pe" tvg-name="Radio Chalaca" tvg-logo="" group-title="LATAM - PE",Radio Chalaca
 https://servilive.com:3414/hybrid/play.m3u8
-#EXTINF:-1 tvg-id="RadioChiloe.cl" tvg-name="Radio Chiloe" tvg-logo="" group-title="LATAM - CL",Radio Chiloe
-https://videostream.chileservidores.com:8081/chiloe1/index.m3u8
 #EXTINF:-1 tvg-id="RadioClasicaTV.bo" tvg-name="Radio Clasica TV" tvg-logo="" group-title="LATAM - BO",Radio Clasica TV
 https://ares.disfrutaenlared.com:1936/clasica/clasica/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioCoatanCanal21.gt" tvg-name="Radio Coatan Canal 21" tvg-logo="" group-title="LATAM - GT",Radio Coatan Canal 21
 https://s2.tvdatta.com:3112/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="RadioColmenar925FM.py" tvg-name="Radio Colmenar 92.5 FM" tvg-logo="" group-title="LATAM - PY",Radio Colmenar 92.5 FM
 https://tvdatta.com:3041/live/colmenarlive.m3u8
-#EXTINF:-1 tvg-id="RadioConexionWebTV.ar" tvg-name="Radio Conexion Web TV" tvg-logo="" group-title="LATAM - AR",Radio Conexion Web TV
-https://tuvideoonline.com.ar:3391/live/radioconexionlive.m3u8
 #EXTINF:-1 tvg-id="RadioContemporaneaCoihueco.cl" tvg-name="Radio Contemporanea Coihueco" tvg-logo="" group-title="LATAM - CL",Radio Contemporanea Coihueco
 https://tv.arkeo.cl:19360/8046/8046.m3u8
 #EXTINF:-1 tvg-id="RadioCuencaEstereo.ec" tvg-name="Radio Cuenca Estereo" tvg-logo="" group-title="LATAM - EC",Radio Cuenca Estereo
@@ -2337,8 +2289,6 @@ https://v2.tustreaming.cl/fantasiatv/index.m3u8
 http://190.107.232.9:8082/livestream/stream.m3u8
 #EXTINF:-1 tvg-id="RadioFiestadeMilagrosTV.hn" tvg-name="Radio Fiesta de Milagros TV" tvg-logo="" group-title="LATAM - HN",Radio Fiesta de Milagros TV
 https://tv.webmedialive.com/fiestatv/live/playlist.m3u8
-#EXTINF:-1 tvg-id="RadioFrecuenciaUno.cl" tvg-name="Radio Frecuencia Uno" tvg-logo="" group-title="LATAM - CL",Radio Frecuencia Uno
-https://v1.tustreaming.cl/frecuencia1tv/index.m3u8
 #EXTINF:-1 tvg-id="RadioGuairaTV.py" tvg-name="Radio Guaira TV" tvg-logo="" group-title="LATAM - PY",Radio Guaira TV
 https://tvdatta.com:3991/live/guairatvlive.m3u8
 #EXTINF:-1 tvg-id="RadioHogar.pa" tvg-name="Radio Hogar" tvg-logo="" group-title="LATAM - PA",Radio Hogar
@@ -2353,18 +2303,14 @@ https://v2.tustreaming.cl/rln/index.m3u8
 http://158.172.217.18:8000/play/a01k/index.m3u8
 #EXTINF:-1 tvg-id="RadioMaster.pe" tvg-name="Radio Master" tvg-logo="" group-title="LATAM - PE",Radio Master
 https://videoserver.tmcreativos.com:19360/radiomaster/radiomaster.m3u8
-#EXTINF:-1 tvg-id="RadioMegaTVAmazonia.bo" tvg-name="Radio Mega TV Amazonia" tvg-logo="" group-title="LATAM - BO",Radio Mega TV Amazonia
-https://ares.disfrutaenlared.com:1936/megatv/megatv/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioMonumentalTV.ec" tvg-name="Radio Monumental TV" tvg-logo="" group-title="LATAM - EC",Radio Monumental TV
 https://cloud37.ecuatel.com/monumentaltv/live/manifest.m3u8
-#EXTINF:-1 tvg-id="RadioNuble.cl" tvg-name="Radio Nuble" tvg-logo="" group-title="LATAM - CL",Radio Nuble
-https://tv.telselec.cl:3376/live/nublefmlive.m3u8
-#EXTINF:-1 tvg-id="RadioOmegaTV.hn" tvg-name="Radio Omega TV" tvg-logo="" group-title="LATAM - HN",Radio Omega TV
-https://5caf24a595d94.streamlock.net:1937/8142/8142/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioOndaDigital.pe" tvg-name="Radio Onda Digital" tvg-logo="" group-title="LATAM - PE",Radio Onda Digital
 https://live.ondadigitaltv.com/RADIOODTV/index.m3u8
 #EXTINF:-1 tvg-id="RadioPanoramica.cl" tvg-name="Radio Panoramica" tvg-logo="" group-title="LATAM - CL",Radio Panoramica
 https://v2.tustreaming.cl/alingeproducciones/index.m3u8
+#EXTINF:-1 tvg-id="RadioPopularTV.cl" tvg-name="Radio Popular TV" tvg-logo="" group-title="LATAM - CL",Radio Popular TV
+https://tv.arkeo.cl:19360/8052/8052.m3u8
 #EXTINF:-1 tvg-id="RadioPudahuel.cl" tvg-name="Radio Pudahuel" tvg-logo="" group-title="LATAM - CL",Radio Pudahuel
 https://unlimited2-cl-isp.dps.live/pudahueltv/pudahueltv.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioRancaguaFM.cl" tvg-name="Radio Rancagua FM" tvg-logo="" group-title="LATAM - CL",Radio Rancagua FM
@@ -2387,8 +2333,6 @@ https://5f700d5b2c46f.streamlock.net/sublime/sublime/playlist.m3u8
 https://cl-2.backend.energeek.cl/RadioSuyai-Neo/index.m3u8
 #EXTINF:-1 tvg-id="RadioTropical.pe" tvg-name="Radio Tropical" tvg-logo="" group-title="LATAM - PE",Radio Tropical
 https://videoserver.tmcreativos.com:19360/raditropical/raditropical.m3u8
-#EXTINF:-1 tvg-id="RadioTVElArcadelPacto.py" tvg-name="Radio TV El Arca del Pacto" tvg-logo="" group-title="LATAM - PY",Radio TV El Arca del Pacto
-https://video.wilohosting.com:19360/radiotvelarcadelpacto/radiotvelarcadelpacto.m3u8
 #EXTINF:-1 tvg-id="RadioTVNeuquen.ar" tvg-name="Radio TV Neuquen" tvg-logo="" group-title="LATAM - AR",Radio TV Neuquen
 https://media.neuquen.gov.ar/rtn/television/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioTVOriente.pe" tvg-name="RadioTV Oriente" tvg-logo="" group-title="LATAM - PE",RadioTV Oriente
@@ -2399,8 +2343,6 @@ https://scl.edge.grupoz.cl/uniaccastream/live/playlist.m3u8
 https://videostream.chileservidores.com:8081/universal/index.m3u8
 #EXTINF:-1 tvg-id="RadioUniversitariaSanAndres.bo" tvg-name="Radio Universitaria San Andres" tvg-logo="" group-title="LATAM - BO",Radio Universitaria San Andres
 https://edge.enhdtv.com/8054/index.m3u8
-#EXTINF:-1 tvg-id="RadioUnoTacna.pe" tvg-name="Radio Uno Tacna" tvg-logo="" group-title="LATAM - PE",Radio Uno Tacna
-https://live-evg7.tv360.bitel.com.pe/bitel/radiounotv/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioUP.ar" tvg-name="Radio UP" tvg-logo="" group-title="LATAM - AR",Radio UP
 https://iptv.ixfo.com.ar:30443/live/RadioUpTvStreaming/playlist.m3u8
 #EXTINF:-1 tvg-id="RadioUSACH.cl" tvg-name="Radio USACH" tvg-logo="" group-title="LATAM - CL",Radio USACH
@@ -2623,8 +2565,6 @@ https://rtp.noxun.net/hls720/stream3.m3u8
 https://rtp.noxun.net/hls480/stream2.m3u8
 #EXTINF:-1 tvg-id="RTP.bo" tvg-name="RTP" tvg-logo="" group-title="LATAM - BO",RTP
 https://rtp.noxun.net/hls/stream.m3u8
-#EXTINF:-1 tvg-id="RTP.pe" tvg-name="RTP" tvg-logo="" group-title="LATAM - PE",RTP
-https://live-evg7.tv360.bitel.com.pe/bitel/rtp/playlist.m3u8
 #EXTINF:-1 tvg-id="RTQQueretaro.mx" tvg-name="RTQ Queretaro" tvg-logo="" group-title="LATAM - MX",RTQ Queretaro
 https://59d39900ebfb8.streamlock.net/rytqrolive/rytqrolive/chunklist.m3u8
 #EXTINF:-1 tvg-id="RTRTV.ec" tvg-name="RTRTV" tvg-logo="" group-title="LATAM - EC",RTRTV
@@ -2677,8 +2617,6 @@ https://stream.lamegatv.com/hls/sanvitotelevision/index.m3u8
 http://tiquiciatv.com:1935/stv/web/playlist.m3u8
 #EXTINF:-1 tvg-id="SarapiquiTV.cr" tvg-name="Sarapiqui TV" tvg-logo="" group-title="LATAM - CR",Sarapiqui TV
 https://lstv.duckdns.org:449/hls/stv.m3u8
-#EXTINF:-1 tvg-id="SASTV.gt" tvg-name="SAS TV" tvg-logo="" group-title="LATAM - GT",SAS TV
-https://cdn.streamhispanatv.net:3390/live/sastvgtlive.m3u8
 #EXTINF:-1 tvg-id="SBTInterior.br" tvg-name="SBT Interior" tvg-logo="" group-title="LATAM - BR",SBT Interior
 https://cdn.jmvstream.com/w/LVW-10801/LVW10801_Xvg4R0u57n/playlist.m3u8
 #EXTINF:-1 tvg-id="SBTNacional.br" tvg-name="SBT Nacional" tvg-logo="" group-title="LATAM - BR",SBT Nacional
@@ -2740,8 +2678,6 @@ http://190.122.104.210:5080/LiveApp/streams/sitv2.m3u8
 #EXTINF:-1 tvg-id="SNT.py" tvg-name="SNT" tvg-logo="" group-title="LATAM - PY",SNT
 https://d3epa8orr2qy3m.cloudfront.net/ts:abr.m3u8
 #EXTINF:-1 tvg-id="SolarTelevision.pe" tvg-name="Solar Television" tvg-logo="" group-title="LATAM - PE",Solar Television
-https://live-evg11.tv360.bitel.com.pe/bitel/solartvSRT/playlist.m3u8
-#EXTINF:-1 tvg-id="SolarTelevision.pe" tvg-name="Solar Television" tvg-logo="" group-title="LATAM - PE",Solar Television
 https://7.innovatestream.pe:19360/corporacionperiodistica/corporacionperiodistica.m3u8
 #EXTINF:-1 tvg-id="SoloTV.cl" tvg-name="Solo TV" tvg-logo="" group-title="LATAM - CL",Solo TV
 https://sproxy.solotv.cl/hls/live/fhd.m3u8
@@ -2769,12 +2705,10 @@ http://45.177.114.115/SONY_MOVIES/index.m3u8
 http://168.197.104.22/SONY_MOVIES/index.m3u8
 #EXTINF:-1 tvg-id="SonyMovies.br" tvg-name="Sony Movies" tvg-logo="" group-title="LATAM - BR",Sony Movies
 http://170.83.16.50/SONY_MOVIES/index.m3u8
-#EXTINF:-1 tvg-id="SoonaTV.co" tvg-name="Soona TV" tvg-logo="" group-title="LATAM - CO",Soona TV
-https://vs20.live.opencaster.com/soonatv_a1a564a9/index.m3u8
 #EXTINF:-1 tvg-id="SOUTV.br" tvg-name="SOU TV" tvg-logo="" group-title="LATAM - BR",SOU TV
 https://video10.logicahost.com.br/soutv/soutv/playlist.m3u8
-#EXTINF:-1 tvg-id="SOYPlanchaTV.cr" tvg-name="SOY Plancha TV" tvg-logo="" group-title="LATAM - CR",SOY Plancha TV
-https://59ef525c24caa.streamlock.net/vmtv/soyplancha/playlist.m3u8
+#EXTINF:-1 tvg-id="Space.ar" tvg-name="Space" tvg-logo="" group-title="LATAM - AR",Space
+http://45.171.64.30:6060/play/a04n/index.m3u8
 #EXTINF:-1 tvg-id="SporTV2.br" tvg-name="SporTV 2" tvg-logo="" group-title="LATAM - BR",SporTV 2
 http://195.178.110.110/sportv2/index.m3u8
 #EXTINF:-1 tvg-id="SporTV3.br" tvg-name="SporTV 3" tvg-logo="" group-title="LATAM - BR",SporTV 3
@@ -2793,6 +2727,8 @@ http://190.61.47.54:8000/play/a035/index.m3u8
 https://sistemastr.tropicalmoonmedia.com:443/live/9E495C5FDA503D7F71037F2D2C5D3FA3/16.m3u8
 #EXTINF:-1 tvg-id="StudioPascoTV.pe" tvg-name="Studio Pasco TV" tvg-logo="" group-title="LATAM - PE",Studio Pasco TV
 https://live-evg7.tv360.bitel.com.pe/bitel/studiopasco/playlist.m3u8
+#EXTINF:-1 tvg-id="StudioPlusTV.ec" tvg-name="Studio + TV" tvg-logo="" group-title="LATAM - EC",Studio + TV
+https://vd01.streaminghd.net.ar:3113/hybrid/play.m3u8
 #EXTINF:-1 tvg-id="STVETelebasica.hn" tvg-name="STVE Telebasica" tvg-logo="" group-title="LATAM - HN",STVE Telebasica
 https://streamingcws30.com/suyapa/videosuyapa/playlist.m3u8
 #EXTINF:-1 tvg-id="STZTV.br" tvg-name="STZ TV" tvg-logo="" group-title="LATAM - BR",STZ TV
@@ -2837,8 +2773,6 @@ https://streamingcws30.com/suyapa2/videosuyapa2/playlist.m3u8
 http://45.167.2.101:8000/play/a0qx/index.m3u8
 #EXTINF:-1 tvg-id="SVPlus.sv" tvg-name="SV+" tvg-logo="" group-title="LATAM - SV",SV+
 http://186.33.26.18:8000/play/a0qx/index.m3u8
-#EXTINF:-1 tvg-id="T5Satelital.ar" tvg-name="T5 Satelital" tvg-logo="" group-title="LATAM - AR",T5 Satelital
-https://stream.t5satelital.blog/hls/t5satelitalweb.m3u8
 #EXTINF:-1 tvg-id="T13EnVivo.cl" tvg-name="T13 En Vivo" tvg-logo="" group-title="LATAM - CL",T13 En Vivo
 https://redirector.dps.live/hls/t13/playlist.m3u8
 #EXTINF:-1 tvg-id="TAMTV.ve" tvg-name="TAM TV" tvg-logo="" group-title="LATAM - VE",TAM TV
@@ -3021,8 +2955,6 @@ https://s.emisoras.tv:8081/telerayo/index.m3u8
 https://k20.usastreams.com:8081/telered/index.m3u8
 #EXTINF:-1 tvg-id="TeleSaltillo.mx" tvg-name="Tele Saltillo" tvg-logo="" group-title="LATAM - MX",Tele Saltillo
 https://servilive.com:3879/live/telesaltillolive.m3u8
-#EXTINF:-1 tvg-id="Telesangil.co" tvg-name="Telesangil" tvg-logo="" group-title="LATAM - CO",Telesangil
-https://live20.bozztv.com/akamaissh101/ssh101/telesangil/playlist.m3u8
 #EXTINF:-1 tvg-id="Teleselva.pe" tvg-name="Teleselva" tvg-logo="" group-title="LATAM - PE",Teleselva
 https://live-evg7.tv360.bitel.com.pe/bitel/teleselva/playlist.m3u8
 #EXTINF:-1 tvg-id="Teleselva.pe" tvg-name="Teleselva" tvg-logo="" group-title="LATAM - PE",Teleselva
@@ -3061,8 +2993,6 @@ http://server2grupocam.com:1945/teleunion/TU/playlist.m3u8
 https://hls.tvabierta.net/hls/029.m3u8
 #EXTINF:-1 tvg-id="TeleUno.cr" tvg-name="Tele Uno" tvg-logo="" group-title="LATAM - CR",Tele Uno
 http://tv.teleunotv.cr:1935/TVUNO/TVUNO/playlist.m3u8
-#EXTINF:-1 tvg-id="TeleUV.mx" tvg-name="Tele UV" tvg-logo="" group-title="LATAM - MX",Tele UV
-https://58fe359775f31.streamlock.net/tvuv/myStream/playlist.m3u8
 #EXTINF:-1 tvg-id="Televen.ve" tvg-name="Televen" tvg-logo="" group-title="LATAM - VE",Televen
 http://181.78.8.199:8000/play/a09j/index.m3u8
 #EXTINF:-1 tvg-id="Televen.ve" tvg-name="Televen" tvg-logo="" group-title="LATAM - VE",Televen
@@ -3081,14 +3011,16 @@ https://edge.essastream.com/televisiondeleste/tracks-v1a1/mono.m3u8
 https://5e85d90130e77.streamlock.net/6028/6028/playlist.m3u8
 #EXTINF:-1 tvg-id="TelevisionMetropolis192.hn" tvg-name="Television Metropolis 19.2" tvg-logo="" group-title="LATAM - HN",Television Metropolis 19.2
 https://5e85d90130e77.streamlock.net/6014/6014/playlist.m3u8
-#EXTINF:-1 tvg-id="TelevisionOlanchana.hn" tvg-name="Television Olanchana" tvg-logo="" group-title="LATAM - HN",Television Olanchana
-https://viewhn.com/canal30/live/playlist.m3u8
+#EXTINF:-1 tvg-id="TelevisionPublica.ar" tvg-name="Television Publica" tvg-logo="" group-title="LATAM - AR",Television Publica
+http://190.128.214.97:64333/play/a008/index.m3u8
 #EXTINF:-1 tvg-id="TelevisionTarapoto.pe" tvg-name="Television Tarapoto" tvg-logo="" group-title="LATAM - PE",Television Tarapoto
 https://live-evg11.tv360.bitel.com.pe/bitel/tvtarapotoSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="TelevisoradeOriente.ve" tvg-name="Televisora de Oriente" tvg-logo="" group-title="LATAM - VE",Televisora de Oriente
 https://cloud.fastchannel.es/manifiest/hls/prog9/tvo.m3u8
 #EXTINF:-1 tvg-id="TeleYucatan.mx" tvg-name="Tele Yucatan" tvg-logo="" group-title="LATAM - MX",Tele Yucatan
 https://5ca3e84a76d30.streamlock.net/teleyucatan/videoteleyucatan/playlist.m3u8
+#EXTINF:-1 tvg-id="TenarensesTV.do" tvg-name="Tenarenses TV" tvg-logo="" group-title="LATAM - DO",Tenarenses TV
+https://edge.essastream.com/tenarensestvrd/playlist.m3u8
 #EXTINF:-1 tvg-id="TENCanal10.hn" tvg-name="TEN Canal 10" tvg-logo="" group-title="LATAM - HN",TEN Canal 10
 https://raw.githubusercontent.com/BellezaEmporium/IPTV_Exception/master/channels/hn/tentv.m3u8
 #EXTINF:-1 tvg-id="TendenciasPrime.cl" tvg-name="Tendencias Prime" tvg-logo="" group-title="LATAM - CL",Tendencias Prime
@@ -3141,8 +3073,6 @@ https://ss2.tvrdomi.com:1936/tigueritostv/tigueritostv/playlist.m3u8
 https://d1bl6tskrpq9ze.cloudfront.net/hls/master.m3u8?ads.xumo_channelId=99992529
 #EXTINF:-1 tvg-id="TimesBrasil.br" tvg-name="Times Brasil" tvg-logo="" group-title="LATAM - BR",Times Brasil
 https://ssai2-ads.api.leiniao.com/global-adinsertion-api/hls/live/v2/21fdb6dd7491406bba86497a24390a25/playlist.m3u8
-#EXTINF:-1 tvg-id="TlaxcalaTV.mx" tvg-name="Tlaxcala TV" tvg-logo="" group-title="LATAM - MX",Tlaxcala TV
-https://vid26.mega00.com:5443/live/streams/qNmc7nulmq8zPYZE1582752735050.m3u8
 #EXTINF:-1 tvg-id="TlnovelasLatinAmerica.mx" tvg-name="Tlnovelas Latin America" tvg-logo="" group-title="LATAM - MX",Tlnovelas Latin America
 http://138.121.15.230:9002/TELENOVELAS/index.m3u8
 #EXTINF:-1 tvg-id="TlnovelasMexico.mx" tvg-name="Tlnovelas Mexico" tvg-logo="" group-title="LATAM - MX",Tlnovelas Mexico
@@ -3259,8 +3189,6 @@ http://170.83.49.66:8083/TVBRASILHD/index.m3u8
 http://186.219.52.187/tv_brasil/index.m3u8
 #EXTINF:-1 tvg-id="TVBrasil.br" tvg-name="TV Brasil" tvg-logo="" group-title="LATAM - BR",TV Brasil
 https://tvbrasil-stream.ebc.com.br/index.m3u8
-#EXTINF:-1 tvg-id="TVBrasilOeste.br" tvg-name="TV Brasil Oeste" tvg-logo="" group-title="LATAM - BR",TV Brasil Oeste
-https://5ad482a77183d.streamlock.net/operacaotbomt.com/operacaotbomt.com/playlist.m3u8
 #EXTINF:-1 tvg-id="TVBRICSPortuguese.br" tvg-name="TV BRICS Portuguese" tvg-logo="" group-title="LATAM - BR",TV BRICS Portuguese
 https://porbrics.mediacdn.ru/cdn/brics/portuguese/playlist.m3u8
 #EXTINF:-1 tvg-id="TVC.ec" tvg-name="TVC" tvg-logo="" group-title="LATAM - EC",TVC
@@ -3299,6 +3227,8 @@ http://186.219.52.187/cancao_nova/index.m3u8
 https://5c65286fc6ace.streamlock.net/cancaonova/CancaoNova.stream_720p/playlist.m3u8
 #EXTINF:-1 tvg-id="TVCanindeyu.py" tvg-name="TV Canindeyu" tvg-logo="" group-title="LATAM - PY",TV Canindeyu
 https://video.hostingcaaguazu.com:19360/tvcanindeyu/tvcanindeyu.m3u8
+#EXTINF:-1 tvg-id="TVCentro272HD.hn" tvg-name="TV Centro 27.2 HD" tvg-logo="" group-title="LATAM - HN",TV Centro 27.2 HD
+https://cloud2.streaminglivehd.com:1936/8004/8004/playlist.m3u8
 #EXTINF:-1 tvg-id="TVCentroHD.hn" tvg-name="TV Centro HD" tvg-logo="" group-title="LATAM - HN",TV Centro HD
 https://cloud2.streaminglivehd.com:1936/8032/8032/playlist.m3u8
 #EXTINF:-1 tvg-id="TVChile.cl" tvg-name="TV Chile" tvg-logo="" group-title="LATAM - CL",TV Chile
@@ -3319,8 +3249,6 @@ https://5b7f3c45ab7c2.streamlock.net/8008/smil:8008.smil/playlist.m3u8?DVR=
 https://s.emisoras.tv:8081/tvcopan/index.m3u8
 #EXTINF:-1 tvg-id="TVCosmos.pe" tvg-name="TV Cosmos" tvg-logo="" group-title="LATAM - PE",TV Cosmos
 https://videoserver.tmcreativos.com:19360/tvcosmos/tvcosmos.m3u8
-#EXTINF:-1 tvg-id="TVCotuiCanal31.do" tvg-name="TV Cotui Canal 31" tvg-logo="" group-title="LATAM - DO",TV Cotui Canal 31
-https://live20.bozztv.com/akamaissh101/ssh101/tvcotui/playlist.m3u8
 #EXTINF:-1 tvg-id="TVCRET.sv" tvg-name="TV CRET" tvg-logo="" group-title="LATAM - SV",TV CRET
 https://radiocret.net:8082/hls/tvcret.m3u8
 #EXTINF:-1 tvg-id="TVCRio.br" tvg-name="TVC-Rio" tvg-logo="" group-title="LATAM - BR",TVC-Rio
@@ -3359,6 +3287,8 @@ http://streaming.procergs.com.br:1935/tve/stve/playlist.m3u8
 https://srt.tvdatta.com/tvenlinea/index.m3u8
 #EXTINF:-1 tvg-id="TVERS.br" tvg-name="TVE RS" tvg-logo="" group-title="LATAM - BR",TVE RS
 https://streaming.procergs.com.br:8443/tve/stve/playlist.m3u8
+#EXTINF:-1 tvg-id="TVes.ve" tvg-name="TVes" tvg-logo="" group-title="LATAM - VE",TVes
+https://vs20.live.opencaster.com/tves_5fd18b1e/index.m3u8
 #EXTINF:-1 tvg-id="TVEstrella.hn" tvg-name="TV Estrella" tvg-logo="" group-title="LATAM - HN",TV Estrella
 https://s.emisoras.tv:8081/tve/index.m3u8
 #EXTINF:-1 tvg-id="TVEvangelizar.br" tvg-name="TV Evangelizar" tvg-logo="" group-title="LATAM - BR",TV Evangelizar
@@ -3395,8 +3325,6 @@ https://serversv.com:8080/hls/tvgetsemani.m3u8
 https://stmv7.voxtvhd.com.br/golfo/golfo/playlist.m3u8
 #EXTINF:-1 tvg-id="TVGracia.co" tvg-name="TVGracia" tvg-logo="" group-title="LATAM - CO",TVGracia
 https://vs20.live.opencaster.com/diego_57244803/index.m3u8
-#EXTINF:-1 tvg-id="TVGRANDENATALHDTVBRASIL.br" tvg-name="TV GRANDE NATAL HDTV BRASIL" tvg-logo="" group-title="LATAM - BR",TV GRANDE NATAL HDTV BRASIL
-http://tvgrandenatalhd.duckdns.org:8080/hls/live.m3u8
 #EXTINF:-1 tvg-id="TVGuara.br" tvg-name="TV Guara" tvg-logo="" group-title="LATAM - BR",TV Guara
 https://video02.logicahost.com.br/tvguara23/tvguara23/playlist.m3u8
 #EXTINF:-1 tvg-id="TVGuarapari.br" tvg-name="TV Guarapari" tvg-logo="" group-title="LATAM - BR",TV Guarapari
@@ -3417,6 +3345,8 @@ http://170.83.16.50/TV_JUSTICA/index.m3u8
 http://170.83.49.66:8083/TVJUSTICAHD/index.m3u8
 #EXTINF:-1 tvg-id="TVJustica.br" tvg-name="TV Justica" tvg-logo="" group-title="LATAM - BR",TV Justica
 http://186.219.52.187/tv_justica/index.m3u8
+#EXTINF:-1 tvg-id="TVKaliente.pe" tvg-name="TV Kaliente" tvg-logo="" group-title="LATAM - PE",TV Kaliente
+https://lbgo.bozztv.com/ssh101/ssh101/kalientecusco/playlist.m3u8
 #EXTINF:-1 tvg-id="TVLatina.bo" tvg-name="TV Latina" tvg-logo="" group-title="LATAM - BO",TV Latina
 https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
 #EXTINF:-1 tvg-id="TVLatina.bo" tvg-name="TV Latina" tvg-logo="" group-title="LATAM - BO",TV Latina
@@ -3439,8 +3369,6 @@ https://host.streamingnation.live/p/3780/live/tvluzlive.m3u8
 https://5cf4a2c2512a2.streamlock.net/tvmaismarica/tvmaismarica/playlist.m3u8
 #EXTINF:-1 tvg-id="TVManaArgentina.ar" tvg-name="TV Mana Argentina" tvg-logo="" group-title="LATAM - AR",TV Mana Argentina
 https://w2.manasat.com/tvmana-ar/smil:tvmana-ar.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="TVMAR.pe" tvg-name="TV MAR" tvg-logo="" group-title="LATAM - PE",TV MAR
-https://live-evg11.tv360.bitel.com.pe/bitel/tvmarSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="TVMarajoara.br" tvg-name="TV Marajoara" tvg-logo="" group-title="LATAM - BR",TV Marajoara
 https://tv02.zas.media:1936/tvmarajoara/tvmarajoara/playlist.m3u8
 #EXTINF:-1 tvg-id="TVMarLaPaz.mx" tvg-name="TV Mar La Paz" tvg-logo="" group-title="LATAM - MX",TV Mar La Paz
@@ -3489,8 +3417,6 @@ https://cdn.jmvstream.com/w/LVW-8410/LVW8410_uiZOVm6vz1/playlist.m3u8
 https://live-evg5.tv360.bitel.com.pe/bitel/tvnorte/playlist.m3u8
 #EXTINF:-1 tvg-id="TVO.do" tvg-name="TVO" tvg-logo="" group-title="LATAM - DO",TVO
 https://videoserver.tmcreativos.com:19360/gkemzxrrmr/gkemzxrrmr.m3u8
-#EXTINF:-1 tvg-id="TVOasisMonay.ve" tvg-name="TV Oasis Monay" tvg-logo="" group-title="LATAM - VE",TV Oasis Monay
-https://servilive.com:3562/live/vav4c8z38live.m3u8
 #EXTINF:-1 tvg-id="TVOCanal23.sv" tvg-name="TVO Canal 23" tvg-logo="" group-title="LATAM - SV",TVO Canal 23
 http://45.167.2.101:8000/play/a0qo/index.m3u8
 #EXTINF:-1 tvg-id="TVOCanal23.sv" tvg-name="TVO Canal 23" tvg-logo="" group-title="LATAM - SV",TVO Canal 23
@@ -3539,16 +3465,12 @@ http://190.93.224.42/TV-PERU-NOTICIAS/index.m3u8
 http://bantel-cdn1.iptvperu.tv:1935/btnscrtn/tvperunoticias.stream/playlist.m3u8
 #EXTINF:-1 tvg-id="TVPetropolis.br" tvg-name="TV Petropolis" tvg-logo="" group-title="LATAM - BR",TV Petropolis
 https://video02.logicahost.com.br/tvpetropolis/tvpetropolis/playlist.m3u8
-#EXTINF:-1 tvg-id="TVPlata.do" tvg-name="TV Plata" tvg-logo="" group-title="LATAM - DO",TV Plata
-https://ss2.tvrdomi.com:1936/tvplata/tvplata/playlist.m3u8
 #EXTINF:-1 tvg-id="TVPLosMochis.mx" tvg-name="TVP Los Mochis" tvg-logo="" group-title="LATAM - MX",TVP Los Mochis
 https://5ca3e84a76d30.streamlock.net/gpacifico2/mochis.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="TVPlus.cl" tvg-name="TV+" tvg-logo="" group-title="LATAM - CL",TV+
 https://jireh-8-hls-video-us-isp.dps.live/hls-video/ey6283je82983je9823je8jowowiekldk9838274/tvmas/tvmas.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="TVPlus.cl" tvg-name="TV+" tvg-logo="" group-title="LATAM - CL",TV+
 http://190.234.82.52:8000/play/a0lz/index.m3u8
-#EXTINF:-1 tvg-id="TVPlusChincha.pe" tvg-name="TV+ Chincha" tvg-logo="" group-title="LATAM - PE",TV+ Chincha
-https://live-evg11.tv360.bitel.com.pe/bitel/tvchincha/playlist.m3u8
 #EXTINF:-1 tvg-id="TVPlusPet.br" tvg-name="TV+Pet" tvg-logo="" group-title="LATAM - BR",TV+Pet
 https://stmv5.samcast.com.br/tvmaispet6354/tvmaispet6354/playlist.m3u8
 #EXTINF:-1 tvg-id="TVPMazatlan.mx" tvg-name="TVP Mazatlan" tvg-logo="" group-title="LATAM - MX",TVP Mazatlan
@@ -3571,8 +3493,6 @@ http://186.219.52.187/ratimbum/index.m3u8
 http://45.162.64.114/RA_TIM_BUM/index.m3u8
 #EXTINF:-1 tvg-id="TVS.do" tvg-name="TVS" tvg-logo="" group-title="LATAM - DO",TVS
 https://imagenuniversaltv.net:3741/live/tvslive.m3u8
-#EXTINF:-1 tvg-id="TVS.ve" tvg-name="TVS" tvg-logo="" group-title="LATAM - VE",TVS
-https://vcp10.myplaytv.com/tvs/tvs/playlist.m3u8
 #EXTINF:-1 tvg-id="TVSaoRaimundo.br" tvg-name="TV Sao Raimundo" tvg-logo="" group-title="LATAM - BR",TV Sao Raimundo
 https://stmv1.voxtvhd.com.br/9030/9030/playlist.m3u8
 #EXTINF:-1 tvg-id="TVSenado.br" tvg-name="TV Senado" tvg-logo="" group-title="LATAM - BR",TV Senado
@@ -3637,8 +3557,6 @@ https://cdn.jmvstream.com/w/LVW-9730/LVW9730_LmUwslM8jt/playlist.m3u8
 https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8
 #EXTINF:-1 tvg-id="TyCSports.ar" tvg-name="TyC Sports" tvg-logo="" group-title="LATAM - AR",TyC Sports
 http://38.44.109.41:8003/play/a02l/index.m3u8
-#EXTINF:-1 tvg-id="TyCSportsUSA.ar" tvg-name="TyC Sports USA" tvg-logo="" group-title="LATAM - AR",TyC Sports USA
-http://45.170.130.224:8000/play/a020/index.m3u8
 #EXTINF:-1 tvg-id="UAATV.mx" tvg-name="UAA TV" tvg-logo="" group-title="LATAM - MX",UAA TV
 https://5fe2654d6127d.streamlock.net:443/uaa2/videouaa2/playlist.m3u8
 #EXTINF:-1 tvg-id="UATV.cl" tvg-name="UATV" tvg-logo="" group-title="LATAM - CL",UATV
@@ -3679,6 +3597,8 @@ https://live.enhdtv.com:8081/8190/tracks-v1a1/mono.m3u8
 https://60417ddeaf0d9.streamlock.net/montemorelos/videomontemorelos/playlist.m3u8
 #EXTINF:-1 tvg-id="UNETV.hn" tvg-name="UNE TV" tvg-logo="" group-title="LATAM - HN",UNE TV
 https://amixtv.com:8081/unetvhn/tracks-v1a1/mono.m3u8
+#EXTINF:-1 tvg-id="Unicanal.py" tvg-name="Unicanal" tvg-logo="" group-title="LATAM - PY",Unicanal
+http://45.170.130.224:8000/play/a04y/index.m3u8?hls
 #EXTINF:-1 tvg-id="UnicentroTV.pe" tvg-name="Unicentro TV" tvg-logo="" group-title="LATAM - PE",Unicentro TV
 https://live-evg11.tv360.bitel.com.pe/bitel/unicentroSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="UnifeTV.ar" tvg-name="Unife TV" tvg-logo="" group-title="LATAM - AR",Unife TV
@@ -3699,6 +3619,8 @@ https://play.agenciastreaming.com:8081/uniteltv/index.m3u8
 https://vivo.solumedia.com:19360/uniteve/uniteve.m3u8
 #EXTINF:-1 tvg-id="UniTV.ve" tvg-name="UniTV" tvg-logo="" group-title="LATAM - VE",UniTV
 https://vcp6.myplaytv.com/unitv/unitv/playlist.m3u8
+#EXTINF:-1 tvg-id="UnivalleTelevision.bo" tvg-name="Univalle Television" tvg-logo="" group-title="LATAM - BO",Univalle Television
+https://master.tucableip.com/univalletv/playlist.m3u8
 #EXTINF:-1 tvg-id="UniversitariaTV.pe" tvg-name="Universitaria TV" tvg-logo="" group-title="LATAM - PE",Universitaria TV
 https://live-evg11.tv360.bitel.com.pe/bitel/uraniotv/playlist.m3u8
 #EXTINF:-1 tvg-id="UnivisionLatinAmerica.mx" tvg-name="Univision Latin America" tvg-logo="" group-title="LATAM - MX",Univision Latin America
@@ -3709,8 +3631,6 @@ http://15.204.246.24:8080/UnivisionHD/index.m3u8
 http://190.93.224.42/UNIVISION/index.m3u8
 #EXTINF:-1 tvg-id="UnsionTV.ec" tvg-name="Unsion TV" tvg-logo="" group-title="LATAM - EC",Unsion TV
 http://provedores.unsion.tv:8081/srt/1/playlist.m3u8
-#EXTINF:-1 tvg-id="UPEATV.bo" tvg-name="UPEA TV" tvg-logo="" group-title="LATAM - BO",UPEA TV
-https://tvstream.upea.bo/hls/oSs0jSWumTFIIVY97559.m3u8
 #EXTINF:-1 tvg-id="UranioTV.pe" tvg-name="Uranio TV" tvg-logo="" group-title="LATAM - PE",Uranio TV
 https://live-evg8.tv360.bitel.com.pe/bitel/uranioyurimaguasSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="UranioTV.pe" tvg-name="Uranio TV" tvg-logo="" group-title="LATAM - PE",Uranio TV
@@ -3773,8 +3693,8 @@ http://k4.usastreams.com/videotour/videotour/playlist.m3u8
 https://59ef525c24caa.streamlock.net/videotour/videotour/playlist.m3u8
 #EXTINF:-1 tvg-id="VillaManteroTV.ar" tvg-name="Villa Mantero TV" tvg-logo="" group-title="LATAM - AR",Villa Mantero TV
 https://micanal.ovh/livestreams/515.AUTOOAAZ721F.m3u8
-#EXTINF:-1 tvg-id="Vision3000.do" tvg-name="Vision 3000" tvg-logo="" group-title="LATAM - DO",Vision 3000
-https://ss2.tvrdomi.com:1936/vision3000/vision3000/playlist.m3u8
+#EXTINF:-1 tvg-id="VintageMusic.cr" tvg-name="Vintage Music" tvg-logo="" group-title="LATAM - CR",Vintage Music
+https://59ef525c24caa.streamlock.net/vmtv/tvvintage/playlist.m3u8
 #EXTINF:-1 tvg-id="VisionLatina.pa" tvg-name="Vision Latina" tvg-logo="" group-title="LATAM - PA",Vision Latina
 https://cdn-cloudfront.us-east-1.prod.ingest.aws-infra.dacast.com/live/64917431-2f51-0a46-d4d0-04d111b2393f/master.m3u8
 #EXTINF:-1 tvg-id="VisionNDV.do" tvg-name="Vision NDV" tvg-logo="" group-title="LATAM - DO",Vision NDV
@@ -3805,8 +3725,6 @@ https://cnn.livestreaminggroup.info:3507/live/vtv32live.m3u8
 https://unlimited1-us.dps.live/vtv/vtv.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="VTVValledeAconcagua.cl" tvg-name="VTV Valle de Aconcagua" tvg-logo="" group-title="LATAM - CL",VTV Valle de Aconcagua
 https://unlimited6-cl.dps.live/vtv/vtv.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="WAPATV41.pr" tvg-name="WAPA-TV 4.1" tvg-logo="" group-title="LATAM - PR",WAPA-TV 4.1
-https://wapa-updater.onrender.com/WAPA-TV-4-1.m3u8
 #EXTINF:-1 tvg-id="Wapp.cl" tvg-name="Wapp" tvg-logo="" group-title="LATAM - CL",Wapp
 https://stream.wapptv.cl/video/index.m3u8
 #EXTINF:-1 tvg-id="WataVision.ve" tvg-name="Wata Vision" tvg-logo="" group-title="LATAM - VE",Wata Vision
@@ -3871,8 +3789,6 @@ https://5f2c1b0d880e5.streamlock.net/zacatecas/videozacatecas/playlist.m3u8
 https://tuvideoonline.com.ar:3332/live/xlevelmedialive.m3u8
 #EXTINF:-1 tvg-id="XTOTV.bo" tvg-name="XTOTV" tvg-logo="" group-title="LATAM - BO",XTOTV
 http://190.104.15.135/0.ts
-#EXTINF:-1 tvg-id="XtraTv.do" tvg-name="Xtra Tv" tvg-logo="" group-title="LATAM - DO",Xtra Tv
-https://edge.essastream.com/xtratv/index.m3u8
 #EXTINF:-1 tvg-id="XtremaAccion.ar" tvg-name="Xtrema Accion" tvg-logo="" group-title="LATAM - AR",Xtrema Accion
 https://stmv6.voxtvhd.com.br/cineaccion/cineaccion/playlist.m3u8
 #EXTINF:-1 tvg-id="XtremaCartoons.ar" tvg-name="Xtrema Cartoons" tvg-logo="" group-title="LATAM - AR",Xtrema Cartoons
@@ -3891,10 +3807,6 @@ https://live-evg7.tv360.bitel.com.pe/bitel/yurimaguastvSRT/playlist.m3u8
 https://live-evg5.tv360.bitel.com.pe/bitel/yurivisionSRT/playlist.m3u8
 #EXTINF:-1 tvg-id="ZAZ.mx" tvg-name="ZAZ" tvg-logo="" group-title="LATAM - MX",ZAZ
 https://cloud.fastchannel.es/mic/manifiest/hls/zaztv/zaztv.m3u8
-#EXTINF:-1 tvg-id="ZeleveTV.pe" tvg-name="Zeleve TV" tvg-logo="" group-title="LATAM - PE",Zeleve TV
-https://live-evg11.tv360.bitel.com.pe/bitel/zeleve/playlist.m3u8
-#EXTINF:-1 tvg-id="ZeleveTV.pe" tvg-name="Zeleve TV" tvg-logo="" group-title="LATAM - PE",Zeleve TV
-https://7.innovatestream.pe:19360/zelevetv/zelevetv.m3u8
 #EXTINF:-1 tvg-id="ZincNombreTV.do" tvg-name="Zinc Nombre TV" tvg-logo="" group-title="LATAM - DO",Zinc Nombre TV
 https://5790d294af2dc.streamlock.net/zincnombretv/live/playlist.m3u8
 #EXTINF:-1 tvg-id="ZonaLatina.cl" tvg-name="Zona Latina" tvg-logo="" group-title="LATAM - CL",Zona Latina

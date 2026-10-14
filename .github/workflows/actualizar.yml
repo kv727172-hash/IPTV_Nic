@@ -1,9 +1,9 @@
-name: Actualizar IPTV LATAM
+name: Actualizar IPTV LATAM Centroamerica e Internacionales
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: '20 12 * * *'
 
 permissions:
   contents: write
@@ -11,571 +11,286 @@ permissions:
 jobs:
   actualizar:
     runs-on: ubuntu-latest
-
-    # Evita que una ejecución pueda quedarse horas
-    timeout-minutes: 15
-
     steps:
-
-      # ==========================================
-      # 1. DESCARGAR REPOSITORIO
-      # ==========================================
-      - name: Descargar repositorio
+      - name: Obtener repositorio
         uses: actions/checkout@v4
-
-
-      # ==========================================
-      # 2. DESCARGAR DATOS DE IPTV-ORG
-      # ==========================================
-      - name: Descargar datos de IPTV-org
+      - name: Generar lista sin Brasil ni duplicados
+        shell: bash
         run: |
-
-          curl -L --fail \
-            --retry 3 \
-            --connect-timeout 15 \
-            --max-time 90 \
-            "https://iptv-org.github.io/api/channels.json" \
-            -o channels.json
-
-          curl -L --fail \
-            --retry 3 \
-            --connect-timeout 15 \
-            --max-time 90 \
-            "https://iptv-org.github.io/api/streams.json" \
-            -o streams.json
-
-          echo "Datos descargados correctamente."
-
-
-      # ==========================================
-      # 3. GENERAR LISTA LATAM
-      # ==========================================
-      - name: Generar lista LATAM
-        run: |
-
-          python3 <<'PY'
-
+          cat > /tmp/generar_iptv.py <<'PYTHON_IPTV'
+          #!/usr/bin/env python3
+          """Une las dos listas IPTV-org, filtra Latinoamérica + internacionales y elimina repetidos.
+          
+          Uso: python3 generar_lista.py
+          No requiere librerías de terceros.
+          """
           import json
-          import os
-
-          # Países considerados LATAM
-          LATAM = {
-              "ar",
-              "bo",
-              "br",
-              "cl",
-              "co",
-              "cr",
-              "cu",
-              "do",
-              "ec",
-              "sv",
-              "gt",
-              "hn",
-              "mx",
-              "ni",
-              "pa",
-              "py",
-              "pe",
-              "pr",
-              "uy",
-              "ve"
-          }
-
-          with open(
-              "channels.json",
-              "r",
-              encoding="utf-8"
-          ) as f:
-              channels = json.load(f)
-
-          with open(
-              "streams.json",
-              "r",
-              encoding="utf-8"
-          ) as f:
-              streams = json.load(f)
-
-
-          # ------------------------------------------
-          # IDENTIFICAR CANALES LATAM
-          # ------------------------------------------
-
-          canales_latam = {}
-
-          for channel in channels:
-
-              channel_id = channel.get("id")
-
-              if not channel_id:
-                  continue
-
-              countries = channel.get(
-                  "country",
-                  []
-              )
-
-              if isinstance(countries, str):
-                  countries = [countries]
-
-              countries = {
-                  str(x).lower()
-                  for x in countries
-              }
-
-
-              broadcast = channel.get(
-                  "broadcastArea",
-                  []
-              )
-
-              if isinstance(broadcast, str):
-                  broadcast = [broadcast]
-
-              broadcast = {
-                  str(x).lower()
-                  for x in broadcast
-              }
-
-
-              es_latam = bool(
-                  countries & LATAM
-              )
-
-
-              # Canales regionales LATAM
-              if not es_latam:
-
-                  for area in broadcast:
-
-                      if (
-                          "latin" in area
-                          or "latam" in area
-                      ):
-                          es_latam = True
-                          break
-
-
-              if es_latam:
-
-                  canales_latam[
-                      channel_id
-                  ] = channel
-
-
-          print(
-              "Canales LATAM:",
-              len(canales_latam)
-          )
-
-
-          # ------------------------------------------
-          # CREAR DIRECTORIO
-          # ------------------------------------------
-
-          os.makedirs(
-              "listas",
-              exist_ok=True
-          )
-
-
-          # ------------------------------------------
-          # GENERAR M3U
-          # ------------------------------------------
-
-          urls = set()
-
-          resultado = []
-
-          resultado.append(
-              "#EXTM3U\n"
-          )
-
-
-          for stream in streams:
-
-              channel_id = stream.get(
-                  "channel"
-              )
-
-              url = stream.get(
-                  "url"
-              )
-
-
-              if not channel_id:
-                  continue
-
-              if not url:
-                  continue
-
-
-              if channel_id not in canales_latam:
-                  continue
-
-
-              if not url.startswith(
-                  (
-                      "http://",
-                      "https://"
-                  )
-              ):
-                  continue
-
-
-              # Eliminar duplicados
-              if url in urls:
-                  continue
-
-              urls.add(url)
-
-
-              channel = canales_latam[
-                  channel_id
-              ]
-
-
-              nombre = channel.get(
-                  "name",
-                  channel_id
-              )
-
-
-              logo = channel.get(
-                  "logo",
-                  ""
-              )
-
-
-              countries = channel.get(
-                  "country",
-                  []
-              )
-
-
-              if isinstance(
-                  countries,
-                  str
-              ):
-                  countries = [
-                      countries
-                  ]
-
-
-              pais = (
-                  countries[0].upper()
-                  if countries
-                  else "LATAM"
-              )
-
-
-              resultado.append(
-                  '#EXTINF:-1 '
-                  f'tvg-id="{channel_id}" '
-                  f'tvg-name="{nombre}" '
-                  f'tvg-logo="{logo}" '
-                  f'group-title="LATAM - {pais}",'
-                  f'{nombre}\n'
-              )
-
-              resultado.append(
-                  url + "\n"
-              )
-
-
-          # ------------------------------------------
-          # GUARDAR
-          # ------------------------------------------
-
-          archivo = (
-              "listas/latam.m3u"
-          )
-
-
-          with open(
-              archivo,
-              "w",
-              encoding="utf-8"
-          ) as f:
-
-              f.writelines(
-                  resultado
-              )
-
-
-          print()
-          print(
-              "Streams encontrados:",
-              len(urls)
-          )
-
-          print(
-              "Archivo:",
-              archivo
-          )
-
-          PY
-
-
-      # ==========================================
-      # 4. COMPROBAR STREAMS RÁPIDAMENTE
-      # ==========================================
-      - name: Comprobar streams rápidamente
-        run: |
-
-          python3 <<'PY'
-
-          import concurrent.futures
+          import re
+          import unicodedata
           import urllib.request
-          import socket
-          import os
-
-          entrada = (
-              "listas/latam.m3u"
-          )
-
-          salida = (
-              "listas/latam_activos.m3u"
-          )
-
-
-          # ------------------------------------------
-          # LEER M3U
-          # ------------------------------------------
-
-          with open(
-              entrada,
-              "r",
-              encoding="utf-8",
-              errors="ignore"
-          ) as f:
-
-              lineas = f.readlines()
-
-
-          canales = []
-
-          i = 0
-
-          while i < len(lineas):
-
-              if lineas[i].startswith(
-                  "#EXTINF"
-              ):
-
-                  if i + 1 < len(lineas):
-
-                      info = lineas[i]
-                      url = lineas[i + 1].strip()
-
-                      canales.append(
-                          (
-                              info,
-                              url
-                          )
-                      )
-
-                  i += 2
-
-              else:
-
-                  i += 1
-
-
-          print(
-              "Streams a comprobar:",
-              len(canales)
-          )
-
-
-          # ------------------------------------------
-          # COMPROBAR URL
-          # ------------------------------------------
-
-          def comprobar(item):
-
-              info, url = item
-
+          from collections import defaultdict
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          
+          BASE = 'https://iptv-org.github.io'
+          PLAYLISTS = [
+              f'{BASE}/iptv/index.m3u',
+              f'{BASE}/iptv/index.category.m3u',
+          ]
+          CHANNELS_API = f'{BASE}/api/channels.json'
+          FEEDS_API = f'{BASE}/api/feeds.json'
+          OUTPUT = Path('latam_centroamerica_internacionales.m3u')
+          
+          CENTROAMERICA = {
+              'NI': '🇳🇮 Nicaragua', 'HN': '🇭🇳 Honduras',
+              'SV': '🇸🇻 El Salvador', 'GT': '🇬🇹 Guatemala',
+              'CR': '🇨🇷 Costa Rica', 'PA': '🇵🇦 Panamá', 'BZ': '🇧🇿 Belice',
+          }
+          # Incluye Latinoamérica, Suramérica y el Caribe, excepto Brasil.
+          LATAM_CARIBE = {
+              'MX': '🇲🇽 México', 'AR': '🇦🇷 Argentina', 'BO': '🇧🇴 Bolivia',
+              'CL': '🇨🇱 Chile', 'CO': '🇨🇴 Colombia', 'EC': '🇪🇨 Ecuador',
+              'PE': '🇵🇪 Perú', 'PY': '🇵🇾 Paraguay', 'UY': '🇺🇾 Uruguay',
+              'VE': '🇻🇪 Venezuela', 'CU': '🇨🇺 Cuba',
+              'DO': '🇩🇴 República Dominicana', 'PR': '🇵🇷 Puerto Rico',
+              'HT': '🇭🇹 Haití', 'GF': '🇬🇫 Guayana Francesa',
+              'GY': '🇬🇾 Guyana', 'SR': '🇸🇷 Surinam',
+              'AW': '🇦🇼 Aruba', 'CW': '🇨🇼 Curazao',
+              'BQ': '🇧🇶 Caribe Neerlandés', 'SX': '🇸🇽 Sint Maarten',
+              'MF': '🇲🇫 San Martín', 'MQ': '🇲🇶 Martinica',
+              'GP': '🇬🇵 Guadalupe', 'BL': '🇧🇱 San Bartolomé',
+              'JM': '🇯🇲 Jamaica', 'TT': '🇹🇹 Trinidad y Tobago',
+              'BS': '🇧🇸 Bahamas', 'BB': '🇧🇧 Barbados',
+              'AG': '🇦🇬 Antigua y Barbuda', 'DM': '🇩🇲 Dominica',
+              'GD': '🇬🇩 Granada', 'KN': '🇰🇳 San Cristóbal y Nieves',
+              'LC': '🇱🇨 Santa Lucía', 'VC': '🇻🇨 San Vicente',
+              'KY': '🇰🇾 Islas Caimán', 'TC': '🇹🇨 Islas Turcas y Caicos',
+              'VG': '🇻🇬 Islas Vírgenes Británicas',
+              'VI': '🇻🇮 Islas Vírgenes de EE. UU.',
+              'AI': '🇦🇮 Anguila', 'MS': '🇲🇸 Montserrat',
+          }
+          ALL_COUNTRIES = {**CENTROAMERICA, **LATAM_CARIBE}
+          CENTRAL_ORDER = list(CENTROAMERICA)
+          COUNTRY_ORDER = CENTRAL_ORDER + list(LATAM_CARIBE)
+          ORDER = {country: n for n, country in enumerate(COUNTRY_ORDER)}
+          INTERNATIONAL = '🌐 Internacionales'
+          ATTR = re.compile(r'([\w-]+)="([^"]*)"')
+          INTERNATIONAL_NAMES = re.compile(r'\b(internacional(?:es)?|international|world|global)\b', re.I)
+          QUALITY = re.compile(r'\((\d{3,4})[pi]\)', re.I)
+          
+          
+          def get_bytes(url):
+              req = urllib.request.Request(url, headers={
+                  'User-Agent': 'Mozilla/5.0 IPTV-LATAM-Generator/1.0',
+                  'Accept': '*/*',
+              })
+              with urllib.request.urlopen(req, timeout=75) as resp:
+                  return resp.read()
+          
+          
+          def get_json(url):
               try:
-
-                  req = urllib.request.Request(
-                      url,
-                      headers={
-                          "User-Agent":
-                          "Mozilla/5.0"
-                      }
-                  )
-
-
-                  with urllib.request.urlopen(
-                      req,
-                      timeout=5
-                  ) as response:
-
-                      codigo = response.status
-
-
-                      if (
-                          codigo >= 200
-                          and codigo < 400
-                      ):
-
-                          return item
-
-
-              except Exception:
-
-                  pass
-
-
+                  return json.loads(get_bytes(url).decode('utf-8-sig'))
+              except Exception as exc:
+                  print(f'AVISO: sin metadatos auxiliares {url}: {exc}')
+                  return []
+          
+          
+          def parse_m3u(data):
+              """Mantiene las líneas #EXTVLCOPT y #KODIPROP si acompañan al canal."""
+              lines = data.decode('utf-8-sig', errors='replace').splitlines()
+              meta = None
+              extras = []
+              for raw in lines:
+                  line = raw.strip()
+                  if line.startswith('#EXTINF:'):
+                      meta, extras = line, []
+                  elif meta is not None:
+                      if line.startswith('#'):
+                          extras.append(line)
+                      elif line and urlsplit(line).scheme.lower() in ('http', 'https', 'rtsp', 'rtmp', 'udp'):
+                          if ',' not in meta:
+                              meta = None
+                              continue
+                          props = dict(ATTR.findall(meta.split(',', 1)[0]))
+                          name = meta.split(',', 1)[1].strip()
+                          yield {'meta': meta, 'extras': extras[:], 'url': line,
+                                 'props': props, 'name': name}
+                          meta = None
+                          extras = []
+                      elif line:
+                          meta = None
+                          extras = []
+          
+          
+          def country_of_id(channel_id):
+              base = (channel_id or '').split('@', 1)[0]
+              found = re.search(r'\.([A-Za-z]{2})$', base)
+              return found.group(1).upper() if found else ''
+          
+          
+          def normal_name(name):
+              name = QUALITY.sub('', name)
+              name = unicodedata.normalize('NFKD', name)
+              name = ''.join(c for c in name if not unicodedata.combining(c))
+              return re.sub(r'[^a-z0-9]+', '', name.lower())
+          
+          
+          def parse_area(data):
+              if isinstance(data, str):
+                  return [x.strip().upper() for x in data.split(';') if x.strip()]
+              if isinstance(data, list):
+                  return [str(x).strip().upper() for x in data if x]
+              return []
+          
+          
+          def create_maps():
+              channels = get_json(CHANNELS_API)
+              feeds = get_json(FEEDS_API)
+              channel_map = {x['id'].lower(): x for x in channels if isinstance(x, dict) and x.get('id')}
+              feed_map = defaultdict(list)
+              for feed in feeds:
+                  if isinstance(feed, dict) and feed.get('channel'):
+                      feed_map[feed['channel'].lower()].append(feed)
+              print(f'Metadatos: {len(channel_map)} canales, {len(feeds)} feeds')
+              return channel_map, feed_map
+          
+          
+          def classify(entry, channel_map, feed_map):
+              props, name = entry['props'], entry['name']
+              tvg_id = props.get('tvg-id', '').strip()
+              base_id, _, feed_id = tvg_id.partition('@')
+              base_id_l = base_id.lower()
+              record = channel_map.get(base_id_l, {})
+              origin = (record.get('country') or country_of_id(tvg_id)).upper()
+              tvg_countries = re.split(r'[;,/\s]+', props.get('tvg-country', '').upper())
+              tag_codes = {x for x in tvg_countries if x}
+          
+              # Brasil se excluye incluso cuando el canal brasileño también es internacional.
+              if origin == 'BR' or country_of_id(tvg_id) == 'BR' or 'BR' in tag_codes:
+                  return None
+              if record.get('is_nsfw') is True:
+                  return None
+          
+              feeds = feed_map.get(base_id_l, [])
+              if feed_id:
+                  specific = [f for f in feeds if str(f.get('id', '')).lower() == feed_id.lower()]
+                  feeds = specific or feeds
+              areas = {a for f in feeds for a in parse_area(f.get('broadcast_area'))}
+              broadcast_countries = set(tag_codes)
+              for area in areas:
+                  if area.startswith('C/'):
+                      broadcast_countries.add(area[2:])
+                  elif area.startswith('S/'):
+                      broadcast_countries.add(area[2:].split('-', 1)[0])
+              # La procedencia del canal también cuenta, aunque el feed transmita en otro país.
+              if origin:
+                  broadcast_countries.add(origin)
+          
+              for code in COUNTRY_ORDER:
+                  if code in broadcast_countries:
+                      return (ORDER[code], ALL_COUNTRIES[code], code)
+          
+              old_group = props.get('group-title', '').strip().lower()
+              is_international = (
+                  'INT' in tag_codes
+                  or 'R/INT' in areas
+                  or old_group in ('international', 'internacional', 'internacionales')
+                  or bool(INTERNATIONAL_NAMES.search(name))
+              )
+              if is_international:
+                  return (len(COUNTRY_ORDER), INTERNATIONAL, 'INT')
               return None
-
-
-          # ------------------------------------------
-          # COMPROBACIÓN PARALELA
-          # ------------------------------------------
-
-          activos = []
-
-
-          # 30 conexiones simultáneas
-          with concurrent.futures.ThreadPoolExecutor(
-              max_workers=30
-          ) as executor:
-
-              resultados = executor.map(
-                  comprobar,
-                  canales
-              )
-
-
-              for resultado in resultados:
-
-                  if resultado:
-
-                      activos.append(
-                          resultado
-                      )
-
-
-          # ------------------------------------------
-          # CREAR LISTA FINAL
-          # ------------------------------------------
-
-          with open(
-              salida,
-              "w",
-              encoding="utf-8"
-          ) as f:
-
-              f.write(
-                  "#EXTM3U\n"
-              )
-
-
-              for info, url in activos:
-
-                  f.write(
-                      info
-                  )
-
-                  f.write(
-                      url + "\n"
-                  )
-
-
-          os.replace(
-              salida,
-              entrada
-          )
-
-
-          print()
-          print(
-              "================================"
-          )
-
-          print(
-              "Streams originales:",
-              len(canales)
-          )
-
-          print(
-              "Streams activos:",
-              len(activos)
-          )
-
-          print(
-              "Streams eliminados:",
-              len(canales) -
-              len(activos)
-          )
-
-          print(
-              "================================"
-          )
-
-          PY
-
-
-      # ==========================================
-      # 5. MOSTRAR RESULTADO
-      # ==========================================
-      - name: Mostrar resultado final
+          
+          
+          def priority(entry):
+              """Prioriza fuentes sin aviso de geobloqueo y con mejor resolución."""
+              name = entry['name']
+              match = QUALITY.search(name)
+              quality = int(match.group(1)) if match else 0
+              label_penalty = -10000 if re.search(r'\[geo.blocked\]', name, re.I) else 0
+              https_bonus = 10 if entry['url'].startswith('https://') else 0
+              return (label_penalty + quality, https_bonus)
+          
+          
+          def clean_group(meta, group):
+              left, right = meta.split(',', 1)
+              safe = group.replace('"', '')
+              if re.search(r'\bgroup-title="[^"]*"', left):
+                  left = re.sub(r'\bgroup-title="[^"]*"', lambda _: f'group-title="{safe}"', left)
+              else:
+                  left += f' group-title="{safe}"'
+              return left + ',' + right
+          
+          
+          def main():
+              channel_map, feed_map = create_maps()
+              collected = []
+              for url in PLAYLISTS:
+                  content = get_bytes(url)
+                  parsed = list(parse_m3u(content))
+                  print(f'Leídos {len(parsed)} de {url}')
+                  collected.extend(parsed)
+              best = {}
+              links_seen = set()
+              rejected = 0
+              for entry in collected:
+                  group = classify(entry, channel_map, feed_map)
+                  if group is None:
+                      rejected += 1
+                      continue
+                  entry['group'] = group
+                  raw_id = entry['props'].get('tvg-id', '').split('@', 1)[0].casefold()
+                  # Distingue canales homónimos de países distintos, salvo IDs iguales.
+                  key = ('id', raw_id) if raw_id else ('name', group[2], normal_name(entry['name']))
+                  url_key = entry['url'].strip()
+                  # Si URL ya incluida en otro canal, no hay razón para duplicarla.
+                  if key in best:
+                      if priority(entry) > priority(best[key]):
+                          best[key] = entry
+                  else:
+                      best[key] = entry
+          
+              # Segundo barrido: enlaces exactos compartidos por IDs diferentes.
+              final = []
+              for entry in sorted(best.values(), key=lambda e: (-priority(e)[0], -priority(e)[1])):
+                  if entry['url'] in links_seen:
+                      continue
+                  links_seen.add(entry['url'])
+                  final.append(entry)
+              final.sort(key=lambda e: (e['group'][0], normal_name(e['name']), e['url']))
+              if not final:
+                  raise RuntimeError('No se encontró ningún canal. No se sobrescribe la lista anterior.')
+              output = ['#EXTM3U']
+              for entry in final:
+                  output.append(clean_group(entry['meta'], entry['group'][1]))
+                  output.extend(entry['extras'])
+                  output.append(entry['url'])
+              OUTPUT.write_bytes(('\r\n'.join(output) + '\r\n').encode('utf-8'))
+              by_group = defaultdict(int)
+              for entry in final:
+                  by_group[entry['group'][1]] += 1
+              print(f'Excluidos por país o falta de identificación: {rejected}')
+              print(f'Repetidos retirados: {len(collected) - rejected - len(final)}')
+              print(f'Archivo: {OUTPUT} — {len(final)} canales únicos')
+              for group, count in by_group.items():
+                  print(f'  {group}: {count}')
+              print('NOTA: no se hace prueba de reproducción de las URLs ni verificación de geobloqueo.')
+          
+          
+          if __name__ == '__main__':
+              main()
+          PYTHON_IPTV
+          python3 /tmp/generar_iptv.py
+      - name: Publicar archivo M3U
+        shell: bash
         run: |
-
-          echo "===================================="
-          echo "       IPTV LATAM"
-          echo "===================================="
-
-          echo "Archivo:"
-          echo "listas/latam.m3u"
-
-          echo ""
-
-          echo "Canales finales:"
-
-          grep -c "^#EXTINF" \
-            listas/latam.m3u || true
-
-          echo ""
-
-          ls -lh \
-            listas/latam.m3u
-
-
-      # ==========================================
-      # 6. GUARDAR EN GITHUB
-      # ==========================================
-      - name: Guardar cambios
-        run: |
-
-          git config \
-            user.name \
-            "github-actions[bot]"
-
-          git config \
-            user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
-
-
-          git add \
-            listas/latam.m3u
-
-
-          if git diff \
-            --cached \
-            --quiet
-          then
-
-            echo \
-              "No hay cambios."
-
-          else
-
-            git commit \
-              -m "Actualizar IPTV LATAM"
-
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add latam_centroamerica_internacionales.m3u
+          if ! git diff --cached --quiet; then
+            git commit -m 'Actualizar IPTV LATAM sin duplicados'
             git push
-
+          else
+            echo 'Sin cambios'
           fi

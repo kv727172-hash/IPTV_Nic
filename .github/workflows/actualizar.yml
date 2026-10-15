@@ -1,3 +1,4 @@
+
 name: Actualizar IPTV LATAM Centroamerica e Internacionales
 
 on:
@@ -8,30 +9,32 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: actualizar-iptv
+  cancel-in-progress: false
+
 jobs:
   actualizar:
     runs-on: ubuntu-latest
+    timeout-minutes: 55
     steps:
       - name: Obtener repositorio
         uses: actions/checkout@v4
-      - name: Generar lista sin Brasil ni duplicados
+
+      - name: Filtrar y comprobar transmisiones
         shell: bash
         run: |
           cat > /tmp/generar_iptv.py <<'PYTHON_IPTV'
-          #!/usr/bin/env python3
-          """Une las dos listas IPTV-org, filtra Latinoamérica + internacionales y elimina repetidos.
-          
-          Uso: python3 generar_lista.py
-          No requiere librerías de terceros.
-          """
           import json
+          import math
           import re
           import unicodedata
           import urllib.request
           from collections import defaultdict
+          from concurrent.futures import ThreadPoolExecutor, as_completed
           from pathlib import Path
-          from urllib.parse import urlsplit
-          
+          from urllib.parse import urljoin, urlsplit
+
           BASE = 'https://iptv-org.github.io'
           PLAYLISTS = [
               f'{BASE}/iptv/index.m3u',
@@ -40,257 +43,1006 @@ jobs:
           CHANNELS_API = f'{BASE}/api/channels.json'
           FEEDS_API = f'{BASE}/api/feeds.json'
           OUTPUT = Path('latam_centroamerica_internacionales.m3u')
-          
+
+          # CONFIGURACIÓN DEL VERIFICADOR
+
+          ORIGIN = 'http://localhost:3000'
+          WORKERS = 16
+          TIMEOUT = 8
+
+          # Evita reemplazar la lista si la verificación
+          # encuentra una caída masiva de canales.
+          MIN_RETAIN_RATIO = 0.10
+
+          # NICARAGUA Y CENTROAMÉRICA
+
           CENTROAMERICA = {
-              'NI': '🇳🇮 Nicaragua', 'HN': '🇭🇳 Honduras',
-              'SV': '🇸🇻 El Salvador', 'GT': '🇬🇹 Guatemala',
-              'CR': '🇨🇷 Costa Rica', 'PA': '🇵🇦 Panamá', 'BZ': '🇧🇿 Belice',
+              'NI': '🇳🇮 Nicaragua',
+              'HN': '🇭🇳 Honduras',
+              'SV': '🇸🇻 El Salvador',
+              'GT': '🇬🇹 Guatemala',
+              'CR': '🇨🇷 Costa Rica',
+              'PA': '🇵🇦 Panamá',
+              'BZ': '🇧🇿 Belice',
           }
-          # Incluye Latinoamérica, Suramérica y el Caribe, excepto Brasil.
+
+          # LATINOAMÉRICA Y CARIBE
+          # BRASIL NO ESTÁ INCLUIDO
+
           LATAM_CARIBE = {
-              'MX': '🇲🇽 México', 'AR': '🇦🇷 Argentina', 'BO': '🇧🇴 Bolivia',
-              'CL': '🇨🇱 Chile', 'CO': '🇨🇴 Colombia', 'EC': '🇪🇨 Ecuador',
-              'PE': '🇵🇪 Perú', 'PY': '🇵🇾 Paraguay', 'UY': '🇺🇾 Uruguay',
-              'VE': '🇻🇪 Venezuela', 'CU': '🇨🇺 Cuba',
-              'DO': '🇩🇴 República Dominicana', 'PR': '🇵🇷 Puerto Rico',
-              'HT': '🇭🇹 Haití', 'GF': '🇬🇫 Guayana Francesa',
-              'GY': '🇬🇾 Guyana', 'SR': '🇸🇷 Surinam',
-              'AW': '🇦🇼 Aruba', 'CW': '🇨🇼 Curazao',
-              'BQ': '🇧🇶 Caribe Neerlandés', 'SX': '🇸🇽 Sint Maarten',
-              'MF': '🇲🇫 San Martín', 'MQ': '🇲🇶 Martinica',
-              'GP': '🇬🇵 Guadalupe', 'BL': '🇧🇱 San Bartolomé',
-              'JM': '🇯🇲 Jamaica', 'TT': '🇹🇹 Trinidad y Tobago',
-              'BS': '🇧🇸 Bahamas', 'BB': '🇧🇧 Barbados',
-              'AG': '🇦🇬 Antigua y Barbuda', 'DM': '🇩🇲 Dominica',
-              'GD': '🇬🇩 Granada', 'KN': '🇰🇳 San Cristóbal y Nieves',
-              'LC': '🇱🇨 Santa Lucía', 'VC': '🇻🇨 San Vicente',
-              'KY': '🇰🇾 Islas Caimán', 'TC': '🇹🇨 Islas Turcas y Caicos',
+              'MX': '🇲🇽 México',
+              'AR': '🇦🇷 Argentina',
+              'BO': '🇧🇴 Bolivia',
+              'CL': '🇨🇱 Chile',
+              'CO': '🇨🇴 Colombia',
+              'EC': '🇪🇨 Ecuador',
+              'PE': '🇵🇪 Perú',
+              'PY': '🇵🇾 Paraguay',
+              'UY': '🇺🇾 Uruguay',
+              'VE': '🇻🇪 Venezuela',
+              'CU': '🇨🇺 Cuba',
+              'DO': '🇩🇴 República Dominicana',
+              'PR': '🇵🇷 Puerto Rico',
+              'HT': '🇭🇹 Haití',
+              'GF': '🇬🇫 Guayana Francesa',
+              'GY': '🇬🇾 Guyana',
+              'SR': '🇸🇷 Surinam',
+              'AW': '🇦🇼 Aruba',
+              'CW': '🇨🇼 Curazao',
+              'BQ': '🇧🇶 Caribe Neerlandés',
+              'SX': '🇸🇽 Sint Maarten',
+              'MF': '🇲🇫 San Martín',
+              'MQ': '🇲🇶 Martinica',
+              'GP': '🇬🇵 Guadalupe',
+              'BL': '🇧🇱 San Bartolomé',
+              'JM': '🇯🇲 Jamaica',
+              'TT': '🇹🇹 Trinidad y Tobago',
+              'BS': '🇧🇸 Bahamas',
+              'BB': '🇧🇧 Barbados',
+              'AG': '🇦🇬 Antigua y Barbuda',
+              'DM': '🇩🇲 Dominica',
+              'GD': '🇬🇩 Granada',
+              'KN': '🇰🇳 San Cristóbal y Nieves',
+              'LC': '🇱🇨 Santa Lucía',
+              'VC': '🇻🇨 San Vicente',
+              'KY': '🇰🇾 Islas Caimán',
+              'TC': '🇹🇨 Islas Turcas y Caicos',
               'VG': '🇻🇬 Islas Vírgenes Británicas',
               'VI': '🇻🇮 Islas Vírgenes de EE. UU.',
-              'AI': '🇦🇮 Anguila', 'MS': '🇲🇸 Montserrat',
+              'AI': '🇦🇮 Anguila',
+              'MS': '🇲🇸 Montserrat',
           }
-          ALL_COUNTRIES = {**CENTROAMERICA, **LATAM_CARIBE}
-          CENTRAL_ORDER = list(CENTROAMERICA)
-          COUNTRY_ORDER = CENTRAL_ORDER + list(LATAM_CARIBE)
-          ORDER = {country: n for n, country in enumerate(COUNTRY_ORDER)}
+
+          ALL_COUNTRIES = {
+              **CENTROAMERICA,
+              **LATAM_CARIBE,
+          }
+
+          COUNTRY_ORDER = list(ALL_COUNTRIES)
+
+          ORDER = {
+              country: index
+              for index, country in enumerate(COUNTRY_ORDER)
+          }
+
           INTERNATIONAL = '🌐 Internacionales'
-          ATTR = re.compile(r'([\w-]+)="([^"]*)"')
-          INTERNATIONAL_NAMES = re.compile(r'\b(internacional(?:es)?|international|world|global)\b', re.I)
-          QUALITY = re.compile(r'\((\d{3,4})[pi]\)', re.I)
-          
-          
-          def get_bytes(url):
-              req = urllib.request.Request(url, headers={
-                  'User-Agent': 'Mozilla/5.0 IPTV-LATAM-Generator/1.0',
-                  'Accept': '*/*',
-              })
-              with urllib.request.urlopen(req, timeout=75) as resp:
-                  return resp.read()
-          
-          
+
+          ATTR = re.compile(
+              r'([\w-]+)="([^"]*)"'
+          )
+
+          QUALITY = re.compile(
+              r'\((\d{3,4})[pi]\)',
+              re.I
+          )
+
+          INTERNATIONAL_NAMES = re.compile(
+              r'\b(internacional(?:es)?|international|world|global)\b',
+              re.I
+          )
+
+          HEADERS = {
+              'User-Agent': 'Mozilla/5.0 IPTV-Nic-Checker/1.0',
+              'Accept': '*/*',
+              'Origin': ORIGIN,
+          }
+
+          # ========================================
+          # DESCARGAR ARCHIVOS
+          # ========================================
+
+          def get_bytes(url, limit=15000000, timeout=45):
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      'User-Agent': HEADERS['User-Agent']
+                  }
+              )
+
+              with urllib.request.urlopen(
+                  request,
+                  timeout=timeout
+              ) as response:
+                  content = response.read(limit + 1)
+
+              if len(content) > limit:
+                  raise ValueError(
+                      'Archivo demasiado grande'
+                  )
+
+              return content
+
+
           def get_json(url):
               try:
-                  return json.loads(get_bytes(url).decode('utf-8-sig'))
-              except Exception as exc:
-                  print(f'AVISO: sin metadatos auxiliares {url}: {exc}')
+                  return json.loads(
+                      get_bytes(url).decode('utf-8-sig')
+                  )
+              except Exception as error:
+                  print(
+                      f'AVISO: Metadatos no disponibles: {error}',
+                      flush=True
+                  )
                   return []
-          
-          
+
+
+          # ========================================
+          # LEER ARCHIVO M3U
+          # ========================================
+
           def parse_m3u(data):
-              """Mantiene las líneas #EXTVLCOPT y #KODIPROP si acompañan al canal."""
-              lines = data.decode('utf-8-sig', errors='replace').splitlines()
               meta = None
               extras = []
+
+              lines = data.decode(
+                  'utf-8-sig',
+                  errors='replace'
+              ).splitlines()
+
               for raw in lines:
                   line = raw.strip()
+
                   if line.startswith('#EXTINF:'):
-                      meta, extras = line, []
+                      meta = line
+                      extras = []
+
                   elif meta is not None:
                       if line.startswith('#'):
                           extras.append(line)
-                      elif line and urlsplit(line).scheme.lower() in ('http', 'https', 'rtsp', 'rtmp', 'udp'):
-                          if ',' not in meta:
-                              meta = None
-                              continue
-                          props = dict(ATTR.findall(meta.split(',', 1)[0]))
-                          name = meta.split(',', 1)[1].strip()
-                          yield {'meta': meta, 'extras': extras[:], 'url': line,
-                                 'props': props, 'name': name}
+
+                      elif line and urlsplit(line).scheme.lower() in (
+                          'http',
+                          'https'
+                      ):
+                          if ',' in meta:
+                              left, name = meta.split(',', 1)
+
+                              yield {
+                                  'meta': meta,
+                                  'extras': extras[:],
+                                  'url': line,
+                                  'props': dict(
+                                      ATTR.findall(left)
+                                  ),
+                                  'name': name.strip(),
+                              }
+
                           meta = None
                           extras = []
+
                       elif line:
                           meta = None
                           extras = []
-          
-          
+
+
+          # ========================================
+          # IDENTIFICAR PAÍSES
+          # ========================================
+
           def country_of_id(channel_id):
               base = (channel_id or '').split('@', 1)[0]
-              found = re.search(r'\.([A-Za-z]{2})$', base)
-              return found.group(1).upper() if found else ''
-          
-          
+
+              match = re.search(
+                  r'\.([A-Za-z]{2})$',
+                  base
+              )
+
+              return (
+                  match.group(1).upper()
+                  if match else ''
+              )
+
+
           def normal_name(name):
-              name = QUALITY.sub('', name)
-              name = unicodedata.normalize('NFKD', name)
-              name = ''.join(c for c in name if not unicodedata.combining(c))
-              return re.sub(r'[^a-z0-9]+', '', name.lower())
-          
-          
-          def parse_area(data):
-              if isinstance(data, str):
-                  return [x.strip().upper() for x in data.split(';') if x.strip()]
-              if isinstance(data, list):
-                  return [str(x).strip().upper() for x in data if x]
+              text = QUALITY.sub('', name)
+
+              text = unicodedata.normalize(
+                  'NFKD',
+                  text
+              )
+
+              text = ''.join(
+                  character
+                  for character in text
+                  if not unicodedata.combining(character)
+              )
+
+              return re.sub(
+                  r'[^a-z0-9]+',
+                  '',
+                  text.lower()
+              )
+
+
+          def parse_area(value):
+              if isinstance(value, str):
+                  return [
+                      v.strip().upper()
+                      for v in value.split(';')
+                      if v.strip()
+                  ]
+
+              if isinstance(value, list):
+                  return [
+                      str(v).strip().upper()
+                      for v in value
+                      if v
+                  ]
+
               return []
-          
-          
+
+
+          # ========================================
+          # METADATOS IPTV-ORG
+          # ========================================
+
           def create_maps():
-              channels = get_json(CHANNELS_API)
-              feeds = get_json(FEEDS_API)
-              channel_map = {x['id'].lower(): x for x in channels if isinstance(x, dict) and x.get('id')}
-              feed_map = defaultdict(list)
-              for feed in feeds:
-                  if isinstance(feed, dict) and feed.get('channel'):
-                      feed_map[feed['channel'].lower()].append(feed)
-              print(f'Metadatos: {len(channel_map)} canales, {len(feeds)} feeds')
-              return channel_map, feed_map
-          
-          
-          def classify(entry, channel_map, feed_map):
-              props, name = entry['props'], entry['name']
-              tvg_id = props.get('tvg-id', '').strip()
+              channel_data = get_json(CHANNELS_API)
+              feed_data = get_json(FEEDS_API)
+
+              channels = {
+                  r['id'].lower(): r
+                  for r in channel_data
+                  if isinstance(r, dict) and r.get('id')
+              }
+
+              feeds = defaultdict(list)
+
+              for r in feed_data:
+                  if isinstance(r, dict) and r.get('channel'):
+                      feeds[r['channel'].lower()].append(r)
+
+              print(
+                  f'Metadatos: {len(channels)} canales, '
+                  f'{len(feed_data)} feeds',
+                  flush=True
+              )
+
+              return channels, feeds
+
+
+          # ========================================
+          # CLASIFICAR Y EXCLUIR BRASIL
+          # ========================================
+
+          def classify(entry, channels, feed_map):
+              props = entry['props']
+
+              tvg_id = props.get('tvg-id', '')
+
               base_id, _, feed_id = tvg_id.partition('@')
-              base_id_l = base_id.lower()
-              record = channel_map.get(base_id_l, {})
-              origin = (record.get('country') or country_of_id(tvg_id)).upper()
-              tvg_countries = re.split(r'[;,/\s]+', props.get('tvg-country', '').upper())
-              tag_codes = {x for x in tvg_countries if x}
-          
-              # Brasil se excluye incluso cuando el canal brasileño también es internacional.
-              if origin == 'BR' or country_of_id(tvg_id) == 'BR' or 'BR' in tag_codes:
+
+              record = channels.get(
+                  base_id.lower(),
+                  {}
+              )
+
+              origin = str(
+                  record.get('country') or country_of_id(tvg_id)
+              ).upper()
+
+              by_id = country_of_id(tvg_id)
+
+              tag_codes = set(
+                  re.split(
+                      r'[;,/\s]+',
+                      props.get('tvg-country', '').upper()
+                  )
+              )
+
+              # NO INCLUIR BRASIL
+
+              if (
+                  origin == 'BR'
+                  or by_id == 'BR'
+                  or 'BR' in tag_codes
+              ):
                   return None
+
               if record.get('is_nsfw') is True:
                   return None
-          
-              feeds = feed_map.get(base_id_l, [])
+
+              group_text = props.get(
+                  'group-title',
+                  ''
+              ).lower()
+
+              if (
+                  'brasil' in group_text
+                  or 'brazil' in group_text
+              ):
+                  return None
+
+              feeds = feed_map.get(
+                  base_id.lower(),
+                  []
+              )
+
               if feed_id:
-                  specific = [f for f in feeds if str(f.get('id', '')).lower() == feed_id.lower()]
+                  specific = [
+                      f for f in feeds
+                      if str(
+                          f.get('id', '')
+                      ).lower() == feed_id.lower()
+                  ]
+
                   feeds = specific or feeds
-              areas = {a for f in feeds for a in parse_area(f.get('broadcast_area'))}
-              broadcast_countries = set(tag_codes)
+
+              areas = {
+                  a
+                  for f in feeds
+                  for a in parse_area(
+                      f.get('broadcast_area')
+                  )
+              }
+
+              countries = set(tag_codes)
+
               for area in areas:
                   if area.startswith('C/'):
-                      broadcast_countries.add(area[2:])
+                      countries.add(area[2:])
+
                   elif area.startswith('S/'):
-                      broadcast_countries.add(area[2:].split('-', 1)[0])
-              # La procedencia del canal también cuenta, aunque el feed transmita en otro país.
+                      countries.add(
+                          area[2:].split('-', 1)[0]
+                      )
+
+              if 'BR' in countries:
+                  return None
+
               if origin:
-                  broadcast_countries.add(origin)
-          
-              for code in COUNTRY_ORDER:
-                  if code in broadcast_countries:
-                      return (ORDER[code], ALL_COUNTRIES[code], code)
-          
-              old_group = props.get('group-title', '').strip().lower()
-              is_international = (
+                  countries.add(origin)
+
+              for country in COUNTRY_ORDER:
+                  if country in countries:
+                      return (
+                          ORDER[country],
+                          ALL_COUNTRIES[country],
+                          country
+                      )
+
+              if (
                   'INT' in tag_codes
                   or 'R/INT' in areas
-                  or old_group in ('international', 'internacional', 'internacionales')
-                  or bool(INTERNATIONAL_NAMES.search(name))
-              )
-              if is_international:
-                  return (len(COUNTRY_ORDER), INTERNATIONAL, 'INT')
+                  or group_text in (
+                      'international',
+                      'internacional',
+                      'internacionales'
+                  )
+                  or INTERNATIONAL_NAMES.search(
+                      entry['name']
+                  )
+              ):
+                  return (
+                      len(COUNTRY_ORDER),
+                      INTERNATIONAL,
+                      'INT'
+                  )
+
               return None
-          
-          
+
+
+          # ========================================
+          # ELEGIR MEJORES ALTERNATIVAS
+          # ========================================
+
           def priority(entry):
-              """Prioriza fuentes sin aviso de geobloqueo y con mejor resolución."""
-              name = entry['name']
-              match = QUALITY.search(name)
-              quality = int(match.group(1)) if match else 0
-              label_penalty = -10000 if re.search(r'\[geo.blocked\]', name, re.I) else 0
-              https_bonus = 10 if entry['url'].startswith('https://') else 0
-              return (label_penalty + quality, https_bonus)
-          
-          
+              match = QUALITY.search(entry['name'])
+
+              quality = (
+                  int(match.group(1))
+                  if match else 0
+              )
+
+              geo = (
+                  -10000
+                  if re.search(
+                      r'\[geo.blocked\]',
+                      entry['name'],
+                      re.I
+                  )
+                  else 0
+              )
+
+              https = (
+                  1 if entry['url'].startswith('https://')
+                  else 0
+              )
+
+              return quality + geo, https
+
+
+          def valid_url(url):
+              try:
+                  parts = urlsplit(url)
+
+                  return (
+                      parts.scheme in ('http', 'https')
+                      and bool(parts.hostname)
+                      and not (
+                          parts.username
+                          or parts.password
+                      )
+                  )
+
+              except ValueError:
+                  return False
+
+
+          # ========================================
+          # VERIFICAR CORS
+          # ========================================
+
+          def allowed_cors(headers):
+              value = headers.get(
+                  'Access-Control-Allow-Origin',
+                  ''
+              ).strip()
+
+              return (
+                  value == '*'
+                  or value == ORIGIN
+              )
+
+
+          # ========================================
+          # DESCARGAR LISTA O SEGMENTO
+          # ========================================
+
+          def fetch_checked(url, binary=False):
+              if not valid_url(url):
+                  raise ValueError(
+                      'URL no permitida'
+                  )
+
+              headers = dict(HEADERS)
+
+              if binary:
+                  headers['Range'] = 'bytes=0-1023'
+
+              request = urllib.request.Request(
+                  url,
+                  headers=headers
+              )
+
+              with urllib.request.urlopen(
+                  request,
+                  timeout=TIMEOUT
+              ) as response:
+
+                  if not allowed_cors(
+                      response.headers
+                  ):
+                      raise ValueError(
+                          'CORS no autorizado'
+                      )
+
+                  max_bytes = (
+                      1024
+                      if binary
+                      else 512000
+                  )
+
+                  data = response.read(
+                      max_bytes + 1
+                  )
+
+                  if (
+                      not data
+                      or len(data) > max_bytes
+                  ):
+                      raise ValueError(
+                          'Respuesta vacía o demasiado grande'
+                      )
+
+                  if binary:
+                      content_type = response.headers.get(
+                          'Content-Type',
+                          ''
+                      ).lower()
+
+                      if (
+                          'text/html' in content_type
+                          or data.lstrip().lower().startswith(
+                              b'<html'
+                          )
+                      ):
+                          raise ValueError(
+                              'El segmento devolvió HTML'
+                          )
+
+                  return data, response.geturl()
+
+
+          # ========================================
+          # VERIFICAR CADENA HLS COMPLETA
+          # ========================================
+
+          def test_hls(url, depth=0, visited=None):
+              if depth > 3:
+                  return False
+
+              visited = (
+                  set()
+                  if visited is None
+                  else set(visited)
+              )
+
+              if url in visited:
+                  return False
+
+              visited.add(url)
+
+              try:
+                  content, final_url = fetch_checked(url)
+
+                  playlist = content.decode(
+                      'utf-8-sig',
+                      errors='replace'
+                  ).strip()
+
+                  if not playlist.startswith('#EXTM3U'):
+                      return False
+
+                  lines = [
+                      line.strip()
+                      for line in playlist.splitlines()
+                  ]
+
+                  # LISTAS SECUNDARIAS
+
+                  variants = []
+
+                  for i, line in enumerate(lines):
+                      if line.startswith(
+                          '#EXT-X-STREAM-INF:'
+                      ):
+                          for next_line in lines[i + 1:]:
+                              if (
+                                  next_line
+                                  and not next_line.startswith('#')
+                              ):
+                                  variants.append(
+                                      urljoin(
+                                          final_url,
+                                          next_line
+                                      )
+                                  )
+                                  break
+
+                  if variants:
+                      return any(
+                          test_hls(
+                              variant,
+                              depth + 1,
+                              visited
+                          )
+                          for variant in variants[:3]
+                      )
+
+                  # DEBE CONTENER SEGMENTOS DE VIDEO
+
+                  if not any(
+                      line.startswith('#EXTINF:')
+                      or line.startswith('#EXT-X-PART:')
+                      for line in lines
+                  ):
+                      return False
+
+                  # COMPROBAR LLAVES Y SEGMENTOS
+                  # DE INICIALIZACIÓN, SI EXISTEN
+
+                  for line in lines:
+                      if (
+                          line.startswith('#EXT-X-KEY:')
+                          and 'METHOD=NONE' not in line
+                      ):
+                          key = re.search(
+                              r'URI="([^"]+)"',
+                              line
+                          )
+
+                          if key:
+                              fetch_checked(
+                                  urljoin(
+                                      final_url,
+                                      key.group(1)
+                                  ),
+                                  binary=True
+                              )
+
+                      if line.startswith('#EXT-X-MAP:'):
+                          init = re.search(
+                              r'URI="([^"]+)"',
+                              line
+                          )
+
+                          if init:
+                              fetch_checked(
+                                  urljoin(
+                                      final_url,
+                                      init.group(1)
+                                  ),
+                                  binary=True
+                              )
+
+                  # COMPROBAR UN SEGMENTO REAL
+
+                  for line in lines:
+                      if line.startswith('#EXT-X-PART:'):
+                          part = re.search(
+                              r'URI="([^"]+)"',
+                              line
+                          )
+
+                          if part:
+                              fetch_checked(
+                                  urljoin(
+                                      final_url,
+                                      part.group(1)
+                                  ),
+                                  binary=True
+                              )
+
+                              return True
+
+                      if line and not line.startswith('#'):
+                          fetch_checked(
+                              urljoin(
+                                  final_url,
+                                  line
+                              ),
+                              binary=True
+                          )
+
+                          return True
+
+                  return False
+
+              except Exception:
+                  return False
+
+
+          # ========================================
+          # PROBAR ALTERNATIVAS DEL MISMO CANAL
+          # ========================================
+
+          def check_group(item):
+              _, options = item
+
+              for entry in options[:4]:
+                  if test_hls(entry['url']):
+                      return entry
+
+              return None
+
+
+          # ========================================
+          # GENERAR GROUP-TITLE
+          # ========================================
+
           def clean_group(meta, group):
-              left, right = meta.split(',', 1)
+              left, name = meta.split(',', 1)
+
+              left = re.sub(
+                  r'\s*group-title="[^"]*"',
+                  '',
+                  left
+              )
+
               safe = group.replace('"', '')
-              if re.search(r'\bgroup-title="[^"]*"', left):
-                  left = re.sub(r'\bgroup-title="[^"]*"', lambda _: f'group-title="{safe}"', left)
-              else:
-                  left += f' group-title="{safe}"'
-              return left + ',' + right
-          
-          
+
+              return (
+                  f'{left} group-title="{safe}",{name}'
+              )
+
+
+          # ========================================
+          # CONTAR CANALES ACTUALES
+          # ========================================
+
+          def count_existing():
+              if not OUTPUT.exists():
+                  return 0
+
+              return sum(
+                  1
+                  for line in OUTPUT.read_text(
+                      encoding='utf-8-sig'
+                  ).splitlines()
+                  if line.startswith('#EXTINF:')
+              )
+
+
+          # ========================================
+          # GENERAR LISTA FILTRADA
+          # ========================================
+
           def main():
-              channel_map, feed_map = create_maps()
+              channels, feeds = create_maps()
+
               collected = []
+
               for url in PLAYLISTS:
-                  content = get_bytes(url)
-                  parsed = list(parse_m3u(content))
-                  print(f'Leídos {len(parsed)} de {url}')
+                  parsed = list(
+                      parse_m3u(
+                          get_bytes(url)
+                      )
+                  )
+
+                  print(
+                      f'Leídos {len(parsed)} de {url}',
+                      flush=True
+                  )
+
                   collected.extend(parsed)
-              best = {}
-              links_seen = set()
+
+              groups = defaultdict(list)
+
               rejected = 0
+
               for entry in collected:
-                  group = classify(entry, channel_map, feed_map)
-                  if group is None:
+                  group = classify(
+                      entry,
+                      channels,
+                      feeds
+                  )
+
+                  if (
+                      group is None
+                      or not valid_url(entry['url'])
+                  ):
                       rejected += 1
                       continue
+
                   entry['group'] = group
-                  raw_id = entry['props'].get('tvg-id', '').split('@', 1)[0].casefold()
-                  # Distingue canales homónimos de países distintos, salvo IDs iguales.
-                  key = ('id', raw_id) if raw_id else ('name', group[2], normal_name(entry['name']))
-                  url_key = entry['url'].strip()
-                  # Si URL ya incluida en otro canal, no hay razón para duplicarla.
-                  if key in best:
-                      if priority(entry) > priority(best[key]):
-                          best[key] = entry
-                  else:
-                      best[key] = entry
-          
-              # Segundo barrido: enlaces exactos compartidos por IDs diferentes.
-              final = []
-              for entry in sorted(best.values(), key=lambda e: (-priority(e)[0], -priority(e)[1])):
-                  if entry['url'] in links_seen:
+
+                  channel_id = entry['props'].get(
+                      'tvg-id',
+                      ''
+                  ).split('@', 1)[0].casefold()
+
+                  key = (
+                      ('id', channel_id)
+                      if channel_id
+                      else (
+                          'name',
+                          group[2],
+                          normal_name(entry['name'])
+                      )
+                  )
+
+                  groups[key].append(entry)
+
+              # DEDUPLICAR Y ORGANIZAR ALTERNATIVAS
+
+              jobs = []
+
+              for key, candidates in groups.items():
+                  unique = {}
+
+                  for entry in candidates:
+                      url = entry['url'].strip()
+
+                      if (
+                          url not in unique
+                          or priority(entry) > priority(
+                              unique[url]
+                          )
+                      ):
+                          unique[url] = entry
+
+                  jobs.append((
+                      key,
+                      sorted(
+                          unique.values(),
+                          key=priority,
+                          reverse=True
+                      )
+                  ))
+
+              print(
+                  f'Candidatos únicos por canal: {len(jobs)}.',
+                  flush=True
+              )
+
+              print(
+                  'Comprobando M3U8, CORS y segmentos...',
+                  flush=True
+              )
+
+              # VERIFICAR VARIOS CANALES A LA VEZ
+
+              checked = 0
+              winners = []
+
+              with ThreadPoolExecutor(
+                  max_workers=WORKERS
+              ) as pool:
+
+                  futures = [
+                      pool.submit(
+                          check_group,
+                          job
+                      )
+                      for job in jobs
+                  ]
+
+                  for future in as_completed(futures):
+                      checked += 1
+
+                      winner = future.result()
+
+                      if winner:
+                          winners.append(winner)
+
+                      if (
+                          checked % 100 == 0
+                          or checked == len(jobs)
+                      ):
+                          print(
+                              f'Probados {checked}/{len(jobs)}; '
+                              f'funcionan técnicamente: {len(winners)}',
+                              flush=True
+                          )
+
+              # ELIMINAR DUPLICADOS POR URL Y NOMBRE
+
+              chosen = []
+
+              used_urls = set()
+              used_names = set()
+
+              for entry in sorted(
+                  winners,
+                  key=priority,
+                  reverse=True
+              ):
+                  name_key = (
+                      entry['group'][2],
+                      normal_name(entry['name'])
+                  )
+
+                  if (
+                      entry['url'] in used_urls
+                      or name_key in used_names
+                  ):
                       continue
-                  links_seen.add(entry['url'])
-                  final.append(entry)
-              final.sort(key=lambda e: (e['group'][0], normal_name(e['name']), e['url']))
-              if not final:
-                  raise RuntimeError('No se encontró ningún canal. No se sobrescribe la lista anterior.')
+
+                  used_urls.add(entry['url'])
+                  used_names.add(name_key)
+
+                  chosen.append(entry)
+
+              chosen.sort(
+                  key=lambda e: (
+                      e['group'][0],
+                      normal_name(e['name'])
+                  )
+              )
+
+              # PROTEGER LA LISTA ANTERIOR
+              # SI FALLAN DEMASIADOS CANALES
+
+              previous = count_existing()
+
+              minimum = (
+                  max(
+                      10,
+                      math.ceil(
+                          previous * MIN_RETAIN_RATIO
+                      )
+                  )
+                  if previous
+                  else 10
+              )
+
+              if len(chosen) < minimum:
+                  raise RuntimeError(
+                      f'Solo {len(chosen)} canales pasaron; '
+                      f'mínimo seguro {minimum}. '
+                      'Se conserva la lista anterior.'
+                  )
+
+              # ESCRIBIR EL ARCHIVO FINAL
+
               output = ['#EXTM3U']
-              for entry in final:
-                  output.append(clean_group(entry['meta'], entry['group'][1]))
-                  output.extend(entry['extras'])
-                  output.append(entry['url'])
-              OUTPUT.write_bytes(('\r\n'.join(output) + '\r\n').encode('utf-8'))
-              by_group = defaultdict(int)
-              for entry in final:
-                  by_group[entry['group'][1]] += 1
-              print(f'Excluidos por país o falta de identificación: {rejected}')
-              print(f'Repetidos retirados: {len(collected) - rejected - len(final)}')
-              print(f'Archivo: {OUTPUT} — {len(final)} canales únicos')
-              for group, count in by_group.items():
-                  print(f'  {group}: {count}')
-              print('NOTA: no se hace prueba de reproducción de las URLs ni verificación de geobloqueo.')
-          
-          
+
+              for entry in chosen:
+                  output.append(
+                      clean_group(
+                          entry['meta'],
+                          entry['group'][1]
+                      )
+                  )
+
+                  output.extend(
+                      entry['extras']
+                  )
+
+                  output.append(
+                      entry['url']
+                  )
+
+              OUTPUT.write_text(
+                  '\r\n'.join(output) + '\r\n',
+                  encoding='utf-8'
+              )
+
+              counts = defaultdict(int)
+
+              for entry in chosen:
+                  counts[
+                      entry['group'][1]
+                  ] += 1
+
+              print(
+                  f'Excluidos por clasificación: {rejected}',
+                  flush=True
+              )
+
+              print(
+                  f'Repetidos y alternativas eliminados: '
+                  f'{len(collected) - rejected - len(chosen)}',
+                  flush=True
+              )
+
+              print(
+                  f'Canales con HLS + segmento + CORS: '
+                  f'{len(chosen)}',
+                  flush=True
+              )
+
+              for group, number in counts.items():
+                  print(
+                      f'  {group}: {number}',
+                      flush=True
+                  )
+
+              print(
+                  'AVISO: la verificación se hizo desde '
+                  'GitHub Actions, no desde Nicaragua.',
+                  flush=True
+              )
+
+
           if __name__ == '__main__':
               main()
           PYTHON_IPTV
+
           python3 /tmp/generar_iptv.py
-      - name: Publicar archivo M3U
+
+      - name: Publicar lista validada
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
           git add latam_centroamerica_internacionales.m3u
+
           if ! git diff --cached --quiet; then
-            git commit -m 'Actualizar IPTV LATAM sin duplicados'
+            git commit -m 'Actualizar IPTV LATAM: validar streams y excluir Brasil'
             git push
           else
-            echo 'Sin cambios'
+            echo 'Sin cambios en la lista'
           fi

@@ -17,182 +17,268 @@ jobs:
   actualizar:
     runs-on: ubuntu-latest
     timeout-minutes: 55
-    steps:
-      - name: Obtener repositorio
-        uses: actions/checkout@v4
 
-      - name: Filtrar y comprobar transmisiones
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Buscar y comprobar canales
         shell: bash
         run: |
-          cat > /tmp/generar_iptv.py <<'PYTHON_IPTV'
-          import json
+          cat > /tmp/actualizar_iptv.py <<'PY'
+          import concurrent.futures
+          import ipaddress
           import math
           import re
-          import unicodedata
+          import urllib.parse
           import urllib.request
           from collections import defaultdict
-          from concurrent.futures import ThreadPoolExecutor, as_completed
           from pathlib import Path
-          from urllib.parse import urljoin, urlsplit
 
-          BASE = 'https://iptv-org.github.io'
-          PLAYLISTS = [
-              f'{BASE}/iptv/index.m3u',
-              f'{BASE}/iptv/index.category.m3u',
-          ]
-          CHANNELS_API = f'{BASE}/api/channels.json'
-          FEEDS_API = f'{BASE}/api/feeds.json'
-          OUTPUT = Path('latam_centroamerica_internacionales.m3u')
-
-          # CONFIGURACIÓN DEL VERIFICADOR
+          OUTPUT = Path(
+              'latam_centroamerica_internacionales.m3u'
+          )
 
           ORIGIN = 'http://localhost:3000'
-          WORKERS = 16
-          TIMEOUT = 8
+          TIMEOUT = 9
+          WORKERS = 14
+          MAX_PER_NAME = 4
+          MIN_RATIO = 0.10
 
-          # Evita reemplazar la lista si la verificación
-          # encuentra una caída masiva de canales.
-          MIN_RETAIN_RATIO = 0.10
+          SOURCES = [
+              'https://iptv-org.github.io/iptv/index.m3u',
+              'https://iptv-org.github.io/iptv/index.category.m3u',
+          ]
 
-          # NICARAGUA Y CENTROAMÉRICA
-
-          CENTROAMERICA = {
-              'NI': '🇳🇮 Nicaragua',
-              'HN': '🇭🇳 Honduras',
-              'SV': '🇸🇻 El Salvador',
-              'GT': '🇬🇹 Guatemala',
-              'CR': '🇨🇷 Costa Rica',
-              'PA': '🇵🇦 Panamá',
-              'BZ': '🇧🇿 Belice',
+          COUNTRIES = {
+              'NI': 'Nicaragua',
+              'HN': 'Honduras',
+              'SV': 'El Salvador',
+              'GT': 'Guatemala',
+              'CR': 'Costa Rica',
+              'PA': 'Panamá',
+              'BZ': 'Belice',
+              'MX': 'México',
+              'AR': 'Argentina',
+              'BO': 'Bolivia',
+              'CL': 'Chile',
+              'CO': 'Colombia',
+              'EC': 'Ecuador',
+              'PE': 'Perú',
+              'PY': 'Paraguay',
+              'UY': 'Uruguay',
+              'VE': 'Venezuela',
+              'CU': 'Cuba',
+              'DO': 'República Dominicana',
+              'PR': 'Puerto Rico',
+              'HT': 'Haití',
+              'GY': 'Guyana',
+              'SR': 'Surinam',
+              'AW': 'Aruba',
+              'CW': 'Curazao',
+              'BQ': 'Caribe Neerlandés',
+              'SX': 'Sint Maarten',
+              'MF': 'San Martín',
+              'MQ': 'Martinica',
+              'GP': 'Guadalupe',
+              'JM': 'Jamaica',
+              'TT': 'Trinidad y Tobago',
+              'BS': 'Bahamas',
+              'BB': 'Barbados',
+              'AG': 'Antigua y Barbuda',
+              'DM': 'Dominica',
+              'GD': 'Granada',
+              'KN': 'San Cristóbal y Nieves',
+              'LC': 'Santa Lucía',
+              'VC': 'San Vicente',
+              'KY': 'Islas Caimán',
+              'TC': 'Islas Turcas y Caicos',
+              'VG': 'Islas Vírgenes Británicas',
+              'VI': 'Islas Vírgenes EE.UU.',
+              'AI': 'Anguila',
+              'MS': 'Montserrat',
+              'GF': 'Guayana Francesa',
+              'BL': 'San Bartolomé',
           }
-
-          # LATINOAMÉRICA Y CARIBE
-          # BRASIL NO ESTÁ INCLUIDO
-
-          LATAM_CARIBE = {
-              'MX': '🇲🇽 México',
-              'AR': '🇦🇷 Argentina',
-              'BO': '🇧🇴 Bolivia',
-              'CL': '🇨🇱 Chile',
-              'CO': '🇨🇴 Colombia',
-              'EC': '🇪🇨 Ecuador',
-              'PE': '🇵🇪 Perú',
-              'PY': '🇵🇾 Paraguay',
-              'UY': '🇺🇾 Uruguay',
-              'VE': '🇻🇪 Venezuela',
-              'CU': '🇨🇺 Cuba',
-              'DO': '🇩🇴 República Dominicana',
-              'PR': '🇵🇷 Puerto Rico',
-              'HT': '🇭🇹 Haití',
-              'GF': '🇬🇫 Guayana Francesa',
-              'GY': '🇬🇾 Guyana',
-              'SR': '🇸🇷 Surinam',
-              'AW': '🇦🇼 Aruba',
-              'CW': '🇨🇼 Curazao',
-              'BQ': '🇧🇶 Caribe Neerlandés',
-              'SX': '🇸🇽 Sint Maarten',
-              'MF': '🇲🇫 San Martín',
-              'MQ': '🇲🇶 Martinica',
-              'GP': '🇬🇵 Guadalupe',
-              'BL': '🇧🇱 San Bartolomé',
-              'JM': '🇯🇲 Jamaica',
-              'TT': '🇹🇹 Trinidad y Tobago',
-              'BS': '🇧🇸 Bahamas',
-              'BB': '🇧🇧 Barbados',
-              'AG': '🇦🇬 Antigua y Barbuda',
-              'DM': '🇩🇲 Dominica',
-              'GD': '🇬🇩 Granada',
-              'KN': '🇰🇳 San Cristóbal y Nieves',
-              'LC': '🇱🇨 Santa Lucía',
-              'VC': '🇻🇨 San Vicente',
-              'KY': '🇰🇾 Islas Caimán',
-              'TC': '🇹🇨 Islas Turcas y Caicos',
-              'VG': '🇻🇬 Islas Vírgenes Británicas',
-              'VI': '🇻🇮 Islas Vírgenes de EE. UU.',
-              'AI': '🇦🇮 Anguila',
-              'MS': '🇲🇸 Montserrat',
-          }
-
-          ALL_COUNTRIES = {
-              **CENTROAMERICA,
-              **LATAM_CARIBE,
-          }
-
-          COUNTRY_ORDER = list(ALL_COUNTRIES)
 
           ORDER = {
-              country: index
-              for index, country in enumerate(COUNTRY_ORDER)
+              code: index
+              for index, code in enumerate(COUNTRIES)
           }
-
-          INTERNATIONAL = '🌐 Internacionales'
 
           ATTR = re.compile(
               r'([\w-]+)="([^"]*)"'
           )
 
-          QUALITY = re.compile(
-              r'\((\d{3,4})[pi]\)',
+          INTL = re.compile(
+              r'\b(international|internacional|'
+              r'internacionales|world|global)\b',
               re.I
           )
 
-          INTERNATIONAL_NAMES = re.compile(
-              r'\b(internacional(?:es)?|international|world|global)\b',
-              re.I
+          def safe(url):
+              try:
+                  p = urllib.parse.urlsplit(url)
+
+                  if (
+                      p.scheme not in ('http', 'https')
+                      or not p.hostname
+                      or p.username
+                      or p.password
+                  ):
+                      return False
+
+                  h = p.hostname.lower()
+
+                  if (
+                      h == 'localhost'
+                      or h.endswith('.local')
+                      or h.endswith('.internal')
+                  ):
+                      return False
+
+                  try:
+                      ip = ipaddress.ip_address(h)
+                      return ip.is_global
+
+                  except ValueError:
+                      return True
+
+              except ValueError:
+                  return False
+
+          class SafeRedirect(
+              urllib.request.HTTPRedirectHandler
+          ):
+              def redirect_request(
+                  self,
+                  req,
+                  fp,
+                  code,
+                  msg,
+                  headers,
+                  newurl
+              ):
+                  if not safe(newurl):
+                      raise ValueError(
+                          'Redirección insegura'
+                      )
+
+                  return super().redirect_request(
+                      req,
+                      fp,
+                      code,
+                      msg,
+                      headers,
+                      newurl
+                  )
+
+          OPENER = urllib.request.build_opener(
+              SafeRedirect()
           )
 
-          HEADERS = {
-              'User-Agent': 'Mozilla/5.0 IPTV-Nic-Checker/1.0',
-              'Accept': '*/*',
-              'Origin': ORIGIN,
-          }
+          def fetch(
+              url,
+              limit,
+              origin=False,
+              binary=False
+          ):
+              if not safe(url):
+                  raise ValueError(
+                      'URL no válida'
+                  )
 
-          # ========================================
-          # DESCARGAR ARCHIVOS
-          # ========================================
+              headers = {
+                  'User-Agent':
+                      'IPTV-Nic-Checker/2.0',
+                  'Accept': '*/*',
+              }
 
-          def get_bytes(url, limit=15000000, timeout=45):
-              request = urllib.request.Request(
+              if origin:
+                  headers['Origin'] = ORIGIN
+
+              if binary:
+                  headers['Range'] = (
+                      'bytes=0-2047'
+                  )
+
+              req = urllib.request.Request(
                   url,
-                  headers={
-                      'User-Agent': HEADERS['User-Agent']
-                  }
+                  headers=headers
               )
 
-              with urllib.request.urlopen(
-                  request,
+              timeout = (
+                  TIMEOUT if origin else 35
+              )
+
+              with OPENER.open(
+                  req,
                   timeout=timeout
-              ) as response:
-                  content = response.read(limit + 1)
+              ) as r:
 
-              if len(content) > limit:
-                  raise ValueError(
-                      'Archivo demasiado grande'
+                  final = r.geturl()
+
+                  if not safe(final):
+                      raise ValueError(
+                          'Redirección inválida'
+                      )
+
+                  cors = r.headers.get(
+                      'Access-Control-Allow-Origin',
+                      ''
                   )
 
-              return content
+                  if (
+                      origin
+                      and cors not in ('*', ORIGIN)
+                  ):
+                      raise ValueError(
+                          'CORS no disponible'
+                      )
 
+                  typ = r.headers.get(
+                      'Content-Type',
+                      ''
+                  ).lower()
 
-          def get_json(url):
-              try:
-                  return json.loads(
-                      get_bytes(url).decode('utf-8-sig')
-                  )
-              except Exception as error:
-                  print(
-                      f'AVISO: Metadatos no disponibles: {error}',
-                      flush=True
-                  )
-                  return []
+                  data = r.read(limit + 1)
 
+                  if (
+                      not data
+                      or len(data) > limit
+                      or 'text/html' in typ
+                  ):
+                      raise ValueError(
+                          'Respuesta inválida'
+                      )
 
-          # ========================================
-          # LEER ARCHIVO M3U
-          # ========================================
+                  if (
+                      binary
+                      and data.lstrip().lower()
+                      .startswith(
+                          (
+                              b'<html',
+                              b'<!doctype'
+                          )
+                      )
+                  ):
+                      raise ValueError(
+                          'Segmento HTML'
+                      )
+
+                  return data, final
 
           def parse_m3u(data):
-              meta = None
-              extras = []
+              info = None
+              extra = []
 
               lines = data.decode(
                   'utf-8-sig',
@@ -202,837 +288,513 @@ jobs:
               for raw in lines:
                   line = raw.strip()
 
-                  if line.startswith('#EXTINF:'):
-                      meta = line
-                      extras = []
+                  if line.startswith(
+                      '#EXTINF:'
+                  ):
+                      info = line
+                      extra = []
 
-                  elif meta is not None:
+                  elif info:
                       if line.startswith('#'):
-                          extras.append(line)
+                          extra.append(line)
 
-                      elif line and urlsplit(line).scheme.lower() in (
-                          'http',
-                          'https'
-                      ):
-                          if ',' in meta:
-                              left, name = meta.split(',', 1)
+                      elif line:
+                          if (
+                              safe(line)
+                              and ',' in info
+                          ):
+                              left, name = (
+                                  info.split(',', 1)
+                              )
 
                               yield {
-                                  'meta': meta,
-                                  'extras': extras[:],
-                                  'url': line,
+                                  'meta': left,
+                                  'name': name.strip(),
                                   'props': dict(
                                       ATTR.findall(left)
                                   ),
-                                  'name': name.strip(),
+                                  'url': line,
+                                  'extra': extra[:]
                               }
 
-                          meta = None
-                          extras = []
+                          info = None
+                          extra = []
 
-                      elif line:
-                          meta = None
-                          extras = []
+          def classify(e):
+              p = e['props']
 
+              tvgid = p.get(
+                  'tvg-id',
+                  ''
+              ).split('@')[0]
 
-          # ========================================
-          # IDENTIFICAR PAÍSES
-          # ========================================
-
-          def country_of_id(channel_id):
-              base = (channel_id or '').split('@', 1)[0]
-
-              match = re.search(
-                  r'\.([A-Za-z]{2})$',
-                  base
+              suffix = re.search(
+                  r'\.([a-z]{2})$',
+                  tvgid,
+                  re.I
               )
 
-              return (
-                  match.group(1).upper()
-                  if match else ''
+              country = (
+                  suffix.group(1).upper()
+                  if suffix
+                  else ''
               )
 
-
-          def normal_name(name):
-              text = QUALITY.sub('', name)
-
-              text = unicodedata.normalize(
-                  'NFKD',
-                  text
-              )
-
-              text = ''.join(
-                  character
-                  for character in text
-                  if not unicodedata.combining(character)
-              )
-
-              return re.sub(
-                  r'[^a-z0-9]+',
-                  '',
-                  text.lower()
-              )
-
-
-          def parse_area(value):
-              if isinstance(value, str):
-                  return [
-                      v.strip().upper()
-                      for v in value.split(';')
-                      if v.strip()
-                  ]
-
-              if isinstance(value, list):
-                  return [
-                      str(v).strip().upper()
-                      for v in value
-                      if v
-                  ]
-
-              return []
-
-
-          # ========================================
-          # METADATOS IPTV-ORG
-          # ========================================
-
-          def create_maps():
-              channel_data = get_json(CHANNELS_API)
-              feed_data = get_json(FEEDS_API)
-
-              channels = {
-                  r['id'].lower(): r
-                  for r in channel_data
-                  if isinstance(r, dict) and r.get('id')
-              }
-
-              feeds = defaultdict(list)
-
-              for r in feed_data:
-                  if isinstance(r, dict) and r.get('channel'):
-                      feeds[r['channel'].lower()].append(r)
-
-              print(
-                  f'Metadatos: {len(channels)} canales, '
-                  f'{len(feed_data)} feeds',
-                  flush=True
-              )
-
-              return channels, feeds
-
-
-          # ========================================
-          # CLASIFICAR Y EXCLUIR BRASIL
-          # ========================================
-
-          def classify(entry, channels, feed_map):
-              props = entry['props']
-
-              tvg_id = props.get('tvg-id', '')
-
-              base_id, _, feed_id = tvg_id.partition('@')
-
-              record = channels.get(
-                  base_id.lower(),
-                  {}
-              )
-
-              origin = str(
-                  record.get('country') or country_of_id(tvg_id)
-              ).upper()
-
-              by_id = country_of_id(tvg_id)
-
-              tag_codes = set(
+              tags = set(
                   re.split(
-                      r'[;,/\s]+',
-                      props.get('tvg-country', '').upper()
+                      r'[,; /]+',
+                      p.get(
+                          'tvg-country',
+                          ''
+                      ).upper()
                   )
               )
 
-              # NO INCLUIR BRASIL
-
-              if (
-                  origin == 'BR'
-                  or by_id == 'BR'
-                  or 'BR' in tag_codes
-              ):
-                  return None
-
-              if record.get('is_nsfw') is True:
-                  return None
-
-              group_text = props.get(
+              group = p.get(
                   'group-title',
                   ''
               ).lower()
 
               if (
-                  'brasil' in group_text
-                  or 'brazil' in group_text
+                  country == 'BR'
+                  or 'BR' in tags
+                  or 'brasil' in group
+                  or 'brazil' in group
               ):
                   return None
 
-              feeds = feed_map.get(
-                  base_id.lower(),
-                  []
-              )
+              if country in COUNTRIES:
+                  return country
 
-              if feed_id:
-                  specific = [
-                      f for f in feeds
-                      if str(
-                          f.get('id', '')
-                      ).lower() == feed_id.lower()
-                  ]
-
-                  feeds = specific or feeds
-
-              areas = {
-                  a
-                  for f in feeds
-                  for a in parse_area(
-                      f.get('broadcast_area')
-                  )
-              }
-
-              countries = set(tag_codes)
-
-              for area in areas:
-                  if area.startswith('C/'):
-                      countries.add(area[2:])
-
-                  elif area.startswith('S/'):
-                      countries.add(
-                          area[2:].split('-', 1)[0]
-                      )
-
-              if 'BR' in countries:
-                  return None
-
-              if origin:
-                  countries.add(origin)
-
-              for country in COUNTRY_ORDER:
-                  if country in countries:
-                      return (
-                          ORDER[country],
-                          ALL_COUNTRIES[country],
-                          country
-                      )
+              for code, title in (
+                  COUNTRIES.items()
+              ):
+                  if (
+                      code in tags
+                      or group.strip()
+                      == title.lower()
+                  ):
+                      return code
 
               if (
-                  'INT' in tag_codes
-                  or 'R/INT' in areas
-                  or group_text in (
-                      'international',
-                      'internacional',
-                      'internacionales'
-                  )
-                  or INTERNATIONAL_NAMES.search(
-                      entry['name']
-                  )
+                  'INT' in tags
+                  or INTL.search(e['name'])
+                  or 'international' in group
+                  or 'internacional' in group
               ):
-                  return (
-                      len(COUNTRY_ORDER),
-                      INTERNATIONAL,
-                      'INT'
-                  )
+                  return 'INT'
 
               return None
 
-
-          # ========================================
-          # ELEGIR MEJORES ALTERNATIVAS
-          # ========================================
-
-          def priority(entry):
-              match = QUALITY.search(entry['name'])
-
-              quality = (
-                  int(match.group(1))
-                  if match else 0
-              )
-
-              geo = (
-                  -10000
-                  if re.search(
-                      r'\[geo.blocked\]',
-                      entry['name'],
-                      re.I
-                  )
-                  else 0
-              )
-
-              https = (
-                  1 if entry['url'].startswith('https://')
-                  else 0
-              )
-
-              return quality + geo, https
-
-
-          def valid_url(url):
-              try:
-                  parts = urlsplit(url)
-
-                  return (
-                      parts.scheme in ('http', 'https')
-                      and bool(parts.hostname)
-                      and not (
-                          parts.username
-                          or parts.password
-                      )
-                  )
-
-              except ValueError:
-                  return False
-
-
-          # ========================================
-          # VERIFICAR CORS
-          # ========================================
-
-          def allowed_cors(headers):
-              value = headers.get(
-                  'Access-Control-Allow-Origin',
+          def name_key(e):
+              tvgid = e['props'].get(
+                  'tvg-id',
                   ''
-              ).strip()
+              ).split('@')[0]
+
+              if tvgid:
+                  return tvgid.lower()
+
+              return re.sub(
+                  r'[^a-z0-9]',
+                  '',
+                  e['name'].lower()
+              )
+
+          def priority(e):
+              q = re.search(
+                  r'\((\d{3,4})[pi]\)',
+                  e['name'],
+                  re.I
+              )
+
+              blocked = (
+                  '[geo.blocked]'
+                  in e['name'].lower()
+              )
 
               return (
-                  value == '*'
-                  or value == ORIGIN
+                  not blocked,
+                  e['url'].startswith(
+                      'https://'
+                  ),
+                  int(q.group(1))
+                  if q
+                  else 0
               )
 
-
-          # ========================================
-          # DESCARGAR LISTA O SEGMENTO
-          # ========================================
-
-          def fetch_checked(url, binary=False):
-              if not valid_url(url):
-                  raise ValueError(
-                      'URL no permitida'
-                  )
-
-              headers = dict(HEADERS)
-
-              if binary:
-                  headers['Range'] = 'bytes=0-1023'
-
-              request = urllib.request.Request(
-                  url,
-                  headers=headers
-              )
-
-              with urllib.request.urlopen(
-                  request,
-                  timeout=TIMEOUT
-              ) as response:
-
-                  if not allowed_cors(
-                      response.headers
-                  ):
-                      raise ValueError(
-                          'CORS no autorizado'
-                      )
-
-                  max_bytes = (
-                      1024
-                      if binary
-                      else 512000
-                  )
-
-                  data = response.read(
-                      max_bytes + 1
-                  )
-
-                  if (
-                      not data
-                      or len(data) > max_bytes
-                  ):
-                      raise ValueError(
-                          'Respuesta vacía o demasiado grande'
-                      )
-
-                  if binary:
-                      content_type = response.headers.get(
-                          'Content-Type',
-                          ''
-                      ).lower()
-
-                      if (
-                          'text/html' in content_type
-                          or data.lstrip().lower().startswith(
-                              b'<html'
-                          )
-                      ):
-                          raise ValueError(
-                              'El segmento devolvió HTML'
-                          )
-
-                  return data, response.geturl()
-
-
-          # ========================================
-          # VERIFICAR CADENA HLS COMPLETA
-          # ========================================
-
-          def test_hls(url, depth=0, visited=None):
+          def hls(
+              url,
+              depth=0,
+              seen=None
+          ):
               if depth > 3:
                   return False
 
-              visited = (
+              seen = (
                   set()
-                  if visited is None
-                  else set(visited)
+                  if seen is None
+                  else set(seen)
               )
 
-              if url in visited:
+              if url in seen:
                   return False
 
-              visited.add(url)
+              seen.add(url)
 
               try:
-                  content, final_url = fetch_checked(url)
-
-                  playlist = content.decode(
-                      'utf-8-sig',
-                      errors='replace'
-                  ).strip()
-
-                  if not playlist.startswith('#EXTM3U'):
-                      return False
+                  data, final = fetch(
+                      url,
+                      450000,
+                      origin=True
+                  )
 
                   lines = [
-                      line.strip()
-                      for line in playlist.splitlines()
+                      x.strip()
+                      for x in data.decode(
+                          'utf-8-sig',
+                          errors='replace'
+                      ).splitlines()
+                      if x.strip()
                   ]
 
-                  # LISTAS SECUNDARIAS
+                  if (
+                      not lines
+                      or lines[0] != '#EXTM3U'
+                      or not any(
+                          '#EXT-X-' in x
+                          for x in lines
+                      )
+                  ):
+                      return False
+
+                  if any(
+                      x.startswith(
+                          '#EXT-X-KEY:'
+                      )
+                      and 'METHOD=NONE'
+                      not in x
+                      for x in lines
+                  ):
+                      return False
 
                   variants = []
 
-                  for i, line in enumerate(lines):
+                  for i, line in enumerate(
+                      lines
+                  ):
                       if line.startswith(
                           '#EXT-X-STREAM-INF:'
                       ):
-                          for next_line in lines[i + 1:]:
-                              if (
-                                  next_line
-                                  and not next_line.startswith('#')
+                          for sub in (
+                              lines[i + 1:]
+                          ):
+                              if not sub.startswith(
+                                  '#'
                               ):
                                   variants.append(
-                                      urljoin(
-                                          final_url,
-                                          next_line
+                                      urllib.parse.urljoin(
+                                          final,
+                                          sub
                                       )
                                   )
                                   break
 
                   if variants:
                       return any(
-                          test_hls(
-                              variant,
+                          hls(
+                              v,
                               depth + 1,
-                              visited
+                              seen
                           )
-                          for variant in variants[:3]
+                          for v in variants[:3]
                       )
 
-                  # DEBE CONTENER SEGMENTOS DE VIDEO
-
                   if not any(
-                      line.startswith('#EXTINF:')
-                      or line.startswith('#EXT-X-PART:')
-                      for line in lines
+                      x.startswith(
+                          '#EXTINF:'
+                      )
+                      for x in lines
                   ):
                       return False
 
-                  # COMPROBAR LLAVES Y SEGMENTOS
-                  # DE INICIALIZACIÓN, SI EXISTEN
-
                   for line in lines:
-                      if (
-                          line.startswith('#EXT-X-KEY:')
-                          and 'METHOD=NONE' not in line
+                      if line.startswith(
+                          '#EXT-X-MAP:'
                       ):
-                          key = re.search(
+                          match = re.search(
                               r'URI="([^"]+)"',
                               line
                           )
 
-                          if key:
-                              fetch_checked(
-                                  urljoin(
-                                      final_url,
-                                      key.group(1)
+                          if match:
+                              fetch(
+                                  urllib.parse.urljoin(
+                                      final,
+                                      match.group(1)
                                   ),
+                                  2048,
+                                  origin=True,
                                   binary=True
                               )
 
-                      if line.startswith('#EXT-X-MAP:'):
-                          init = re.search(
-                              r'URI="([^"]+)"',
-                              line
-                          )
+                  segments = [
+                      x
+                      for x in lines
+                      if not x.startswith('#')
+                  ]
 
-                          if init:
-                              fetch_checked(
-                                  urljoin(
-                                      final_url,
-                                      init.group(1)
-                                  ),
-                                  binary=True
-                              )
-
-                  # COMPROBAR UN SEGMENTO REAL
-
-                  for line in lines:
-                      if line.startswith('#EXT-X-PART:'):
-                          part = re.search(
-                              r'URI="([^"]+)"',
-                              line
-                          )
-
-                          if part:
-                              fetch_checked(
-                                  urljoin(
-                                      final_url,
-                                      part.group(1)
-                                  ),
-                                  binary=True
-                              )
-
-                              return True
-
-                      if line and not line.startswith('#'):
-                          fetch_checked(
-                              urljoin(
-                                  final_url,
-                                  line
+                  for segment in reversed(
+                      segments[-3:]
+                  ):
+                      try:
+                          fetch(
+                              urllib.parse.urljoin(
+                                  final,
+                                  segment
                               ),
+                              2048,
+                              origin=True,
                               binary=True
                           )
-
                           return True
 
-                  return False
+                      except Exception:
+                          continue
 
               except Exception:
                   return False
 
+              return False
 
-          # ========================================
-          # PROBAR ALTERNATIVAS DEL MISMO CANAL
-          # ========================================
-
-          def check_group(item):
+          def check(item):
               _, options = item
 
-              for entry in options[:4]:
-                  if test_hls(entry['url']):
-                      return entry
+              for e in options[
+                  :MAX_PER_NAME
+              ]:
+                  if hls(e['url']):
+                      return e
 
               return None
 
-
-          # ========================================
-          # GENERAR GROUP-TITLE
-          # ========================================
-
-          def clean_group(meta, group):
-              left, name = meta.split(',', 1)
-
-              left = re.sub(
-                  r'\s*group-title="[^"]*"',
-                  '',
-                  left
-              )
-
-              safe = group.replace('"', '')
-
-              return (
-                  f'{left} group-title="{safe}",{name}'
-              )
-
-
-          # ========================================
-          # CONTAR CANALES ACTUALES
-          # ========================================
-
-          def count_existing():
-              if not OUTPUT.exists():
-                  return 0
-
-              return sum(
-                  1
-                  for line in OUTPUT.read_text(
-                      encoding='utf-8-sig'
-                  ).splitlines()
-                  if line.startswith('#EXTINF:')
-              )
-
-
-          # ========================================
-          # GENERAR LISTA FILTRADA
-          # ========================================
-
           def main():
-              channels, feeds = create_maps()
-
-              collected = []
-
-              for url in PLAYLISTS:
-                  parsed = list(
-                      parse_m3u(
-                          get_bytes(url)
-                      )
-                  )
-
-                  print(
-                      f'Leídos {len(parsed)} de {url}',
-                      flush=True
-                  )
-
-                  collected.extend(parsed)
-
               groups = defaultdict(list)
+              fetched = 0
 
-              rejected = 0
-
-              for entry in collected:
-                  group = classify(
-                      entry,
-                      channels,
-                      feeds
-                  )
-
-                  if (
-                      group is None
-                      or not valid_url(entry['url'])
-                  ):
-                      rejected += 1
-                      continue
-
-                  entry['group'] = group
-
-                  channel_id = entry['props'].get(
-                      'tvg-id',
-                      ''
-                  ).split('@', 1)[0].casefold()
-
-                  key = (
-                      ('id', channel_id)
-                      if channel_id
-                      else (
-                          'name',
-                          group[2],
-                          normal_name(entry['name'])
+              for src in SOURCES:
+                  try:
+                      data, _ = fetch(
+                          src,
+                          18000000
                       )
+
+                      entries = list(
+                          parse_m3u(data)
+                      )
+
+                      fetched += 1
+
+                      print(
+                          f'Fuente: {len(entries)} '
+                          f'entradas — {src}',
+                          flush=True
+                      )
+
+                      for e in entries:
+                          country = classify(e)
+
+                          if country:
+                              e['country'] = country
+
+                              key = (
+                                  country,
+                                  name_key(e)
+                              )
+
+                              groups[key].append(e)
+
+                  except Exception as ex:
+                      print(
+                          f'AVISO: No se pudo '
+                          f'leer {src}: {ex}',
+                          flush=True
+                      )
+
+              if not fetched or not groups:
+                  raise RuntimeError(
+                      'No hay fuentes suficientes; '
+                      'se conserva la lista anterior'
                   )
-
-                  groups[key].append(entry)
-
-              # DEDUPLICAR Y ORGANIZAR ALTERNATIVAS
 
               jobs = []
 
-              for key, candidates in groups.items():
-                  unique = {}
+              for k, entries in (
+                  groups.items()
+              ):
+                  distinct = {}
 
-                  for entry in candidates:
-                      url = entry['url'].strip()
+                  for e in entries:
+                      old = distinct.get(
+                          e['url']
+                      )
 
                       if (
-                          url not in unique
-                          or priority(entry) > priority(
-                              unique[url]
-                          )
+                          old is None
+                          or priority(e)
+                          > priority(old)
                       ):
-                          unique[url] = entry
+                          distinct[e['url']] = e
 
-                  jobs.append((
-                      key,
-                      sorted(
-                          unique.values(),
-                          key=priority,
-                          reverse=True
+                  jobs.append(
+                      (
+                          k,
+                          sorted(
+                              distinct.values(),
+                              key=priority,
+                              reverse=True
+                          )
                       )
-                  ))
+                  )
 
               print(
-                  f'Candidatos únicos por canal: {len(jobs)}.',
+                  'Canales distintos '
+                  f'para comprobar: {len(jobs)}',
                   flush=True
               )
 
-              print(
-                  'Comprobando M3U8, CORS y segmentos...',
-                  flush=True
-              )
-
-              # VERIFICAR VARIOS CANALES A LA VEZ
-
-              checked = 0
               winners = []
 
-              with ThreadPoolExecutor(
+              with concurrent.futures.ThreadPoolExecutor(
                   max_workers=WORKERS
               ) as pool:
 
-                  futures = [
-                      pool.submit(
-                          check_group,
-                          job
-                      )
-                      for job in jobs
-                  ]
-
-                  for future in as_completed(futures):
-                      checked += 1
-
-                      winner = future.result()
-
-                      if winner:
-                          winners.append(winner)
+                  for i, result in enumerate(
+                      pool.map(check, jobs),
+                      1
+                  ):
+                      if result:
+                          winners.append(result)
 
                       if (
-                          checked % 100 == 0
-                          or checked == len(jobs)
+                          i % 100 == 0
+                          or i == len(jobs)
                       ):
                           print(
-                              f'Probados {checked}/{len(jobs)}; '
-                              f'funcionan técnicamente: {len(winners)}',
+                              f'{i}/{len(jobs)} '
+                              'comprobados; '
+                              'HLS y CORS: '
+                              f'{len(winners)}',
                               flush=True
                           )
 
-              # ELIMINAR DUPLICADOS POR URL Y NOMBRE
+              previous = 0
 
-              chosen = []
-
-              used_urls = set()
-              used_names = set()
-
-              for entry in sorted(
-                  winners,
-                  key=priority,
-                  reverse=True
-              ):
-                  name_key = (
-                      entry['group'][2],
-                      normal_name(entry['name'])
+              if OUTPUT.exists():
+                  previous = sum(
+                      1
+                      for x in OUTPUT.read_text(
+                          encoding='utf-8-sig'
+                      ).splitlines()
+                      if x.startswith(
+                          '#EXTINF:'
+                      )
                   )
-
-                  if (
-                      entry['url'] in used_urls
-                      or name_key in used_names
-                  ):
-                      continue
-
-                  used_urls.add(entry['url'])
-                  used_names.add(name_key)
-
-                  chosen.append(entry)
-
-              chosen.sort(
-                  key=lambda e: (
-                      e['group'][0],
-                      normal_name(e['name'])
-                  )
-              )
-
-              # PROTEGER LA LISTA ANTERIOR
-              # SI FALLAN DEMASIADOS CANALES
-
-              previous = count_existing()
 
               minimum = (
                   max(
                       10,
                       math.ceil(
-                          previous * MIN_RETAIN_RATIO
+                          previous * MIN_RATIO
                       )
                   )
                   if previous
                   else 10
               )
 
-              if len(chosen) < minimum:
+              if len(winners) < minimum:
                   raise RuntimeError(
-                      f'Solo {len(chosen)} canales pasaron; '
-                      f'mínimo seguro {minimum}. '
-                      'Se conserva la lista anterior.'
+                      f'Solo {len(winners)} '
+                      'válidos de mínimo '
+                      f'{minimum}; se conserva '
+                      'la lista anterior'
                   )
 
-              # ESCRIBIR EL ARCHIVO FINAL
+              unique = []
+              urls = set()
 
-              output = ['#EXTM3U']
+              for e in sorted(
+                  winners,
+                  key=lambda x: (
+                      ORDER.get(
+                          x['country'],
+                          99
+                      ),
+                      x['name'].lower()
+                  )
+              ):
+                  if e['url'] in urls:
+                      continue
 
-              for entry in chosen:
-                  output.append(
-                      clean_group(
-                          entry['meta'],
-                          entry['group'][1]
-                      )
+                  urls.add(e['url'])
+                  unique.append(e)
+
+              content = ['#EXTM3U']
+
+              for e in unique:
+                  title = (
+                      '🌐 Internacionales'
+                      if e['country'] == 'INT'
+                      else COUNTRIES[
+                          e['country']
+                      ]
                   )
 
-                  output.extend(
-                      entry['extras']
+                  meta = re.sub(
+                      r'\s*group-title="[^"]*"',
+                      '',
+                      e['meta']
                   )
 
-                  output.append(
-                      entry['url']
+                  content.append(
+                      f'{meta} '
+                      f'group-title="{title}",'
+                      f'{e["name"]}'
+                  )
+
+                  content.extend(
+                      e['extra']
+                  )
+                  content.append(
+                      e['url']
                   )
 
               OUTPUT.write_text(
-                  '\r\n'.join(output) + '\r\n',
+                  '\n'.join(content) + '\n',
                   encoding='utf-8'
               )
 
-              counts = defaultdict(int)
-
-              for entry in chosen:
-                  counts[
-                      entry['group'][1]
-                  ] += 1
-
               print(
-                  f'Excluidos por clasificación: {rejected}',
+                  'PUBLICABLE: '
+                  f'{len(unique)} canales. '
+                  f'Anterior: {previous}',
                   flush=True
               )
 
               print(
-                  f'Repetidos y alternativas eliminados: '
-                  f'{len(collected) - rejected - len(chosen)}',
+                  'Nota: prueba desde GitHub; '
+                  'el resultado puede variar '
+                  'en Nicaragua o Chrome.',
                   flush=True
               )
-
-              print(
-                  f'Canales con HLS + segmento + CORS: '
-                  f'{len(chosen)}',
-                  flush=True
-              )
-
-              for group, number in counts.items():
-                  print(
-                      f'  {group}: {number}',
-                      flush=True
-                  )
-
-              print(
-                  'AVISO: la verificación se hizo desde '
-                  'GitHub Actions, no desde Nicaragua.',
-                  flush=True
-              )
-
 
           if __name__ == '__main__':
               main()
-          PYTHON_IPTV
+          PY
 
-          python3 /tmp/generar_iptv.py
+          python3 /tmp/actualizar_iptv.py
 
-      - name: Publicar lista validada
+      - name: Publicar solo si hay cambios
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
@@ -1040,9 +802,10 @@ jobs:
 
           git add latam_centroamerica_internacionales.m3u
 
-          if ! git diff --cached --quiet; then
-            git commit -m 'Actualizar IPTV LATAM: validar streams y excluir Brasil'
-            git push
+          if git diff --cached --quiet; then
+            echo 'Sin cambios para publicar'
           else
-            echo 'Sin cambios en la lista'
+            git commit -m 'Actualizar lista IPTV LATAM verificada'
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi

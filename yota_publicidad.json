@@ -1,0 +1,10 @@
+{
+  "name": "Yota TV",
+  "category": "Publicidad",
+  "type": "youtube_playlist",
+  "channel_url": "https://www.youtube.com/@YotaOfficialNi",
+  "playlist_id": "UUf4d3_6a-NpmZy6q_F9U8MA",
+  "embed_url": "https://www.youtube.com/embed/videoseries?list=UUf4d3_6a-NpmZy6q_F9U8MA&loop=1",
+  "active_in_panel": false,
+  "note": "Requiere integrar el reproductor YouTube en index.html. Verificar que los videos permitan insercion."
+}

@@ -1,0 +1,33 @@
+ACTUALIZACION IPTV
+======================
+Fuentes correctas: 23
+Candidatos: 1995
+Anteriores: 1392
+Conservados: 1335
+HLS comprobados: 1133
+Incorporados: 81
+Total publicado: 1416
+
+Nicaragua: 2
+Honduras: 43
+El Salvador: 14
+Guatemala: 26
+Costa Rica: 41
+Panamá: 13
+Belice: 1
+México: 94
+Argentina: 111
+Bolivia: 38
+Chile: 166
+Colombia: 65
+Ecuador: 52
+Perú: 130
+Paraguay: 34
+Uruguay: 5
+Venezuela: 45
+Cuba: 2
+República Dominicana: 143
+Puerto Rico: 23
+Haití: 13
+Internacionales: 355
+Duracion: 206 s

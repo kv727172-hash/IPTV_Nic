@@ -1,120 +1,747 @@
-                          if match:
-                              fetch(urllib.parse.urljoin(url,match.group(1)),2048,8,True)
-                  segments = [x for x in lines if not x.startswith('#')]
-                  for segment in segments[-3:]:
+
+name: Actualizar IPTV LATAM y Yota TV
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 12 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualizar-iptv
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Buscar, verificar y conservar canales
+        shell: bash
+        run: |
+          cat > /tmp/actualizar.py <<'PY'
+          import concurrent.futures as cf
+          import ipaddress
+          import json
+          import re
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          M3U = Path('latam_centroamerica_internacionales.m3u')
+          YOTA = Path('yota_publicidad.json')
+          REPORTE = Path('reporte_actualizacion_iptv.txt')
+          BASE = 'https://iptv-org.github.io/iptv'
+
+          PAISES = {
+              'NI': 'Nicaragua',
+              'HN': 'Honduras',
+              'SV': 'El Salvador',
+              'GT': 'Guatemala',
+              'CR': 'Costa Rica',
+              'PA': 'Panamá',
+              'BZ': 'Belice',
+              'MX': 'México',
+              'CO': 'Colombia',
+              'AR': 'Argentina',
+              'PE': 'Perú',
+              'CL': 'Chile',
+              'EC': 'Ecuador',
+              'VE': 'Venezuela',
+              'BO': 'Bolivia',
+              'PY': 'Paraguay',
+              'UY': 'Uruguay',
+              'CU': 'Cuba',
+              'DO': 'República Dominicana',
+              'PR': 'Puerto Rico',
+          }
+
+          FUENTES = [
+              (f'{BASE}/languages/spa.m3u', None),
+              (f'{BASE}/regions/cenamer.m3u', None),
+              (f'{BASE}/regions/latam.m3u', None),
+              (f'{BASE}/index.country.m3u', None),
+          ] + [
+              (
+                  f'{BASE}/countries/{codigo.lower()}.m3u',
+                  codigo
+              )
+              for codigo in PAISES
+          ]
+
+          ATR = re.compile(r'([\w-]+)="([^"]*)"')
+
+          def segura(url):
+              try:
+                  p = urllib.parse.urlsplit(url)
+
+                  if (
+                      p.scheme not in ('http', 'https')
+                      or not p.hostname
+                      or p.username
+                      or p.password
+                  ):
+                      return False
+
+                  host = p.hostname.lower()
+
+                  if (
+                      host == 'localhost'
+                      or host.endswith('.local')
+                      or host.endswith('.internal')
+                  ):
+                      return False
+
+                  try:
+                      return ipaddress.ip_address(
+                          host
+                      ).is_global
+                  except ValueError:
+                      return True
+
+              except ValueError:
+                  return False
+
+          class Redireccion(
+              urllib.request.HTTPRedirectHandler
+          ):
+              def redirect_request(
+                  self,
+                  req,
+                  fp,
+                  code,
+                  msg,
+                  headers,
+                  newurl
+              ):
+                  if not segura(newurl):
+                      raise ValueError(
+                          'Redireccion insegura'
+                      )
+
+                  return super().redirect_request(
+                      req,
+                      fp,
+                      code,
+                      msg,
+                      headers,
+                      newurl
+                  )
+
+          ABRIDOR = urllib.request.build_opener(
+              Redireccion()
+          )
+
+          def bajar(
+              url,
+              limite=450000,
+              timeout=9,
+              segmento=False
+          ):
+              if not segura(url):
+                  raise ValueError('URL invalida')
+
+              headers = {
+                  'User-Agent': 'Mozilla/5.0',
+                  'Accept': '*/*'
+              }
+
+              if segmento:
+                  headers['Range'] = 'bytes=0-2047'
+
+              req = urllib.request.Request(
+                  url,
+                  headers=headers
+              )
+
+              with ABRIDOR.open(
+                  req,
+                  timeout=timeout
+              ) as r:
+                  if not segura(r.geturl()):
+                      raise ValueError(
+                          'Redireccion invalida'
+                      )
+
+                  data = r.read(limite + 1)
+                  destino = r.geturl()
+
+              if (
+                  not data
+                  or len(data) > limite
+                  or data.lstrip().lower().startswith(
+                      (b'<html', b'<!doctype')
+                  )
+              ):
+                  raise ValueError(
+                      'Respuesta invalida'
+                  )
+
+              return data, destino
+
+          def separar_extinf(linea):
+              comillas = False
+
+              for i, caracter in enumerate(linea):
+                  if caracter == '"':
+                      comillas = not comillas
+
+                  elif caracter == ',' and not comillas:
+                      return (
+                          linea[:i],
+                          linea[i + 1:].strip()
+                      )
+
+              return None, None
+
+          def leer(datos):
+              texto = datos.decode(
+                  'utf-8-sig',
+                  errors='replace'
+              )
+
+              if not texto.lstrip().startswith(
+                  '#EXTM3U'
+              ):
+                  raise ValueError(
+                      'No es una lista M3U'
+                  )
+
+              meta = None
+              extras = []
+
+              for raw in texto.splitlines():
+                  linea = raw.strip()
+
+                  if linea.startswith('#EXTINF:'):
+                      meta = linea
+                      extras = []
+
+                  elif meta and linea.startswith('#'):
+                      extras.append(linea)
+
+                  elif meta and linea:
+                      if segura(linea):
+                          izquierda, nombre = (
+                              separar_extinf(meta)
+                          )
+
+                          if izquierda and nombre:
+                              yield {
+                                  'name': nombre,
+                                  'url': linea,
+                                  'meta': meta,
+                                  'extra': extras[:],
+                                  'attr': dict(
+                                      ATR.findall(
+                                          izquierda
+                                      )
+                                  )
+                              }
+
+                      meta = None
+                      extras = []
+
+          def pais(canal, fuente=None):
+              a = canal['attr']
+
+              tvgid = a.get(
+                  'tvg-id', ''
+              ).split('@')[0]
+
+              m = re.search(
+                  r'\.([a-z]{2})$',
+                  tvgid,
+                  re.I
+              )
+
+              codigo = (
+                  m.group(1).upper()
+                  if m else ''
+              )
+
+              etiquetas = set(
+                  re.split(
+                      r'[,;/\s]+',
+                      a.get(
+                          'tvg-country', ''
+                      ).upper()
+                  )
+              )
+
+              grupo = a.get(
+                  'group-title', ''
+              ).lower()
+
+              if (
+                  codigo == 'BR'
+                  or 'BR' in etiquetas
+                  or 'brasil' in grupo
+                  or 'brazil' in grupo
+              ):
+                  return None
+
+              if codigo in PAISES:
+                  return codigo
+
+              for key in PAISES:
+                  if (
+                      key in etiquetas
+                      or grupo == PAISES[key].lower()
+                      or grupo.endswith(
+                          ' ' + PAISES[key].lower()
+                      )
+                  ):
+                      return key
+
+              if fuente in PAISES:
+                  return fuente
+
+              if (
+                  'internacional' in grupo
+                  or 'international' in grupo
+              ):
+                  return 'INT'
+
+              return None
+
+          def clave(canal):
+              nombre = (
+                  canal['attr'].get(
+                      'tvg-id', ''
+                  ).split('@')[0]
+                  or canal['name']
+              )
+
+              nombre = re.sub(
+                  r'\s*\((?:\d{3,4}[pi]|'
+                  r'sd|hd|fhd|4k)\)',
+                  '',
+                  nombre,
+                  flags=re.I
+              )
+
+              return (
+                  canal['pais'],
+                  re.sub(
+                      r'[^a-z0-9]',
+                      '',
+                      nombre.lower()
+                  )
+              )
+
+          def hls(
+              url,
+              profundidad=0,
+              visitados=None
+          ):
+              if profundidad > 3:
+                  return False
+
+              visitados = set(
+                  visitados or []
+              )
+
+              if url in visitados:
+                  return False
+
+              visitados.add(url)
+
+              try:
+                  data, final = bajar(url)
+
+                  lines = [
+                      x.strip()
+                      for x in data.decode(
+                          'utf-8-sig',
+                          errors='replace'
+                      ).splitlines()
+                      if x.strip()
+                  ]
+
+                  if (
+                      not lines
+                      or lines[0] != '#EXTM3U'
+                      or not any(
+                          x.startswith('#EXT-X-')
+                          for x in lines
+                      )
+                  ):
+                      return False
+
+                  if any(
+                      x.startswith(
+                          '#EXT-X-KEY:'
+                      )
+                      and 'METHOD=NONE' not in x
+                      for x in lines
+                  ):
+                      return False
+
+                  variantes = []
+
+                  for i, line in enumerate(lines):
+                      if line.startswith(
+                          '#EXT-X-STREAM-INF:'
+                      ):
+                          for sub in lines[i + 1:]:
+                              if not sub.startswith('#'):
+                                  variantes.append(
+                                      urllib.parse.urljoin(
+                                          final,
+                                          sub
+                                      )
+                                  )
+                                  break
+
+                  if variantes:
+                      return any(
+                          hls(
+                              v,
+                              profundidad + 1,
+                              visitados
+                          )
+                          for v in variantes[:3]
+                      )
+
+                  if not any(
+                      x.startswith('#EXTINF:')
+                      for x in lines
+                  ):
+                      return False
+
+                  segmentos = [
+                      x for x in lines
+                      if not x.startswith('#')
+                  ]
+
+                  for segmento in reversed(
+                      segmentos[-3:]
+                  ):
                       try:
-                          fetch(urllib.parse.urljoin(url,segment),2048,8,True)
+                          destino = (
+                              urllib.parse.urljoin(
+                                  final,
+                                  segmento
+                              )
+                          )
+
+                          bajar(
+                              destino,
+                              limite=2048,
+                              segmento=True
+                          )
+
                           return True
+
                       except Exception:
                           pass
+
               except Exception:
                   pass
+
               return False
 
-          def main():
-              if not OUT.exists():
-                  raise RuntimeError('Falta la lista anterior; se detiene para proteger canales')
-              previous = list(parse_m3u(OUT.read_bytes()))
-              if len(previous) < 10:
-                  raise RuntimeError('Lista anterior demasiado pequeña; no se modifica')
-              existing_urls = {x['url'] for x in previous}
-              existing_keys = set()
-              for x in previous:
-                  c = country(x,None)
-                  if c:
-                      x['country'] = c
-                      existing_keys.add(key(x))
-              found = defaultdict(list)
-              sources_ok = 0
-              for url, origin in SOURCES:
+          def comprobar(canal):
+              if hls(canal['url']):
+                  return canal
+
+              return None
+
+          def principal():
+              if M3U.exists():
+                  anteriores = list(
+                      leer(M3U.read_bytes())
+                  )
+              else:
+                  anteriores = []
+
+              finales = []
+              urls = set()
+              claves = set()
+
+              def agregar(canal):
+                  k = clave(canal)
+
+                  if (
+                      canal['url'] in urls
+                      or k in claves
+                  ):
+                      return False
+
+                  urls.add(canal['url'])
+                  claves.add(k)
+                  finales.append(canal)
+
+                  return True
+
+              # Conservar canales anteriores
+              for canal in anteriores:
+                  canal['pais'] = pais(canal)
+
+                  if canal['pais']:
+                      agregar(canal)
+
+              conservados = len(finales)
+
+              candidatos = []
+              vistos = set()
+              fuentes_ok = 0
+
+              for fuente, origen in FUENTES:
                   try:
-                      entries = list(parse_m3u(fetch(url,20_000_000,30)))
-                      sources_ok += 1
-                      for x in entries:
-                          c = country(x,origin)
-                          if not c or not is_spanish(x): continue
-                          x['country'] = c
-                          if x['url'] in existing_urls or key(x) in existing_keys: continue
-                          found[key(x)].append(x)
-                      print('FUENTE OK:',len(entries),url,flush=True)
-                  except Exception as exc:
-                      print('FUENTE NO DISPONIBLE:',url,str(exc)[:90],flush=True)
-              if not sources_ok:
-                  raise RuntimeError('Ninguna fuente respondio; se conserva M3U')
-              order = ['NI','HN','SV','GT','CR','PA','BZ']
-              candidates = []
-              for k, choices in found.items():
-                  unique = list({x['url']:x for x in choices}.values())
-                  unique.sort(key=lambda x:x['url'].startswith('https://'),reverse=True)
-                  candidates.append((k,unique[:3]))
-              candidates.sort(key=lambda item:(order.index(item[0][0]) if item[0][0] in order else 99,item[0]))
-              candidates = candidates[:MAX_CHECK]
-              def check(item):
-                  for x in item[1]:
-                      if hls(x['url']): return x
-                  return None
-              checked = []
-              with cf.ThreadPoolExecutor(max_workers=WORKERS) as pool:
-                  for n,x in enumerate(pool.map(check,candidates),1):
-                      if x: checked.append(x)
-                      if n % 100 == 0: print('Verificados:',n,'Nuevos HLS:',len(checked),flush=True)
-              # Se conservan todos los enlaces anteriores, incluso si fallan hoy.
-              final = previous[:]
-              for x in checked:
-                  if x['url'] in existing_urls or key(x) in existing_keys: continue
-                  existing_urls.add(x['url'])
-                  existing_keys.add(key(x))
-                  group = COUNTRIES[x['country']]
-                  attrs = x['attr']
-                  parts = ['-1']
-                  for field in ('tvg-id','tvg-name','tvg-logo'):
-                      if attrs.get(field):
-                          parts.append(f'{field}="{attrs[field].replace(chr(34), "")}"')
-                  parts.append(f'group-title="{group}"')
-                  name = x['name'].replace('\n',' ').replace('\r',' ')
-                  x['extinf'] = '#EXTINF:'+' '.join(parts)+','+name
-                  final.append(x)
-              lines = ['#EXTM3U']
-              for x in final:
-                  lines.extend((x['extinf'],x['url']))
-              OUT.write_text('\n'.join(lines)+'\n',encoding='utf-8')
-              channel_id = 'UCf4d3_6a-NpmZy6q_F9U8MA'
-              playlist_id = 'UU'+channel_id[2:]
-              YOTA.write_text(json.dumps({
-                  'name':'Yota TV',
-                  'category':'Publicidad',
-                  'type':'youtube_playlist',
-                  'channel_url':'https://www.youtube.com/@YotaOfficialNi',
-                  'playlist_id':playlist_id,
-                  'embed_url':'https://www.youtube.com/embed/videoseries?list='+playlist_id+'&loop=1',
-                  'note':'Reproductor oficial de YouTube; disponibilidad/insercion por verificar. No es M3U8.'
-              },ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-              REPORT.write_text(
-                  f'Fuentes disponibles: {sources_ok}/{len(SOURCES)}\n'
-                  f'Canales anteriores conservados: {len(previous)}\n'
-                  f'Candidatos revisados: {len(candidates)}\n'
-                  f'Canales HLS nuevos: {len(final)-len(previous)}\n'
-                  f'Total en M3U: {len(final)}\n'
-                  'Yota: playlist de subidas preparada en yota_publicidad.json\n'
-                  'Nota: HLS valido no implica reproduccion en Chrome ni permiso de redistribucion.\n',
+                      datos, _ = bajar(
+                          fuente,
+                          limite=20000000,
+                          timeout=30
+                      )
+
+                      cantidad = 0
+
+                      for canal in leer(datos):
+                          canal['pais'] = pais(
+                              canal,
+                              origen
+                          )
+
+                          if not canal['pais']:
+                              continue
+
+                          idioma = canal[
+                              'attr'
+                          ].get(
+                              'tvg-language',
+                              ''
+                          ).lower()
+
+                          if idioma and not any(
+                              texto in idioma
+                              for texto in (
+                                  'spa',
+                                  'es',
+                                  'spanish',
+                                  'español',
+                                  'espanol'
+                              )
+                          ):
+                              continue
+
+                          if (
+                              canal['url'] in urls
+                              or clave(canal) in claves
+                              or canal['url'] in vistos
+                          ):
+                              continue
+
+                          vistos.add(
+                              canal['url']
+                          )
+
+                          candidatos.append(canal)
+                          cantidad += 1
+
+                      fuentes_ok += 1
+
+                      print(
+                          f'FUENTE OK: {cantidad} '
+                          f'candidatos - {fuente}',
+                          flush=True
+                      )
+
+                  except Exception as error:
+                      print(
+                          f'AVISO: {fuente}: {error}',
+                          flush=True
+                      )
+
+              if fuentes_ok == 0:
+                  raise RuntimeError(
+                      'Todas las fuentes fallaron. '
+                      'No se modifica la lista.'
+                  )
+
+              orden = {
+                  codigo: i
+                  for i, codigo in enumerate(
+                      PAISES
+                  )
+              }
+
+              candidatos.sort(
+                  key=lambda c: (
+                      orden.get(
+                          c['pais'],
+                          99
+                      ),
+                      c['name'].lower()
+                  )
+              )
+
+              # Priorizar Nicaragua y
+              # Centroamerica
+              candidatos = candidatos[:1800]
+
+              verificados = 0
+              incorporados = 0
+
+              with cf.ThreadPoolExecutor(
+                  max_workers=16
+              ) as executor:
+                  futuros = [
+                      executor.submit(
+                          comprobar,
+                          canal
+                      )
+                      for canal in candidatos
+                  ]
+
+                  for i, futuro in enumerate(
+                      cf.as_completed(futuros),
+                      1
+                  ):
+                      canal = futuro.result()
+
+                      if canal:
+                          verificados += 1
+
+                          if agregar(canal):
+                              incorporados += 1
+
+                      if i % 100 == 0:
+                          print(
+                              f'REVISADOS {i}/'
+                              f'{len(futuros)} '
+                              f'| HLS {verificados} '
+                              f'| NUEVOS {incorporados}',
+                              flush=True
+                          )
+
+              if len(finales) < max(
+                  10,
+                  int(conservados * 0.9)
+              ):
+                  raise RuntimeError(
+                      'Catalogo demasiado pequeno. '
+                      'Se conserva el anterior.'
+                  )
+
+              finales.sort(
+                  key=lambda canal: (
+                      orden.get(
+                          canal['pais'],
+                          99
+                      ),
+                      canal['name'].lower()
+                  )
+              )
+
+              salida = ['#EXTM3U']
+
+              for canal in finales:
+                  salida.append(
+                      canal['meta']
+                  )
+
+                  salida.extend(
+                      canal['extra']
+                  )
+
+                  salida.append(
+                      canal['url']
+                  )
+
+              M3U.write_text(
+                  '\n'.join(salida) + '\n',
                   encoding='utf-8'
               )
-              print(REPORT.read_text(),flush=True)
-          if __name__ == '__main__':
-              main()
-          PY
-          python /tmp/iptv_update.py
 
-      - name: Guardar cambios en GitHub
+              # Playlist oficial Yota:
+              # Se maneja fuera de la lista M3U
+              YOTA.write_text(
+                  json.dumps(
+                      {
+                          'name': 'Yota TV',
+                          'category': 'Publicidad',
+                          'type': 'youtube_playlist',
+                          'channel_url':
+                              'https://www.youtube.com/@YotaOfficialNi',
+                          'playlist_id':
+                              'UUf4d3_6a-NpmZy6q_F9U8MA',
+                          'embed_url':
+                              'https://www.youtube.com/embed/videoseries?list=UUf4d3_6a-NpmZy6q_F9U8MA&loop=1',
+                          'active_in_panel': False,
+                          'note':
+                              'Requiere integrar el reproductor YouTube en index.html. Verificar que los videos permitan insercion.'
+                      },
+                      indent=2,
+                      ensure_ascii=False
+                  ) + '\n',
+                  encoding='utf-8'
+              )
+
+              informe = [
+                  f'Fuentes descargadas: '
+                  f'{fuentes_ok}/{len(FUENTES)}',
+                  f'Canales anteriores conservados: '
+                  f'{conservados}',
+                  f'Candidatos revisados: '
+                  f'{len(candidatos)}',
+                  f'Candidatos HLS: '
+                  f'{verificados}',
+                  f'Canales nuevos: '
+                  f'{incorporados}',
+                  f'Total en M3U: '
+                  f'{len(finales)}',
+                  'Yota TV: playlist configurada;',
+                  'integracion web pendiente',
+                  'Aviso: HLS comprobado no '
+                  'garantiza imagen en Chrome '
+                  'ni permisos de redistribucion.'
+              ]
+
+              REPORTE.write_text(
+                  '\n'.join(informe) + '\n',
+                  encoding='utf-8'
+              )
+
+              print(
+                  '\n'.join(informe),
+                  flush=True
+              )
+
+          if __name__ == '__main__':
+              principal()
+          PY
+
+          python /tmp/actualizar.py
+
+      - name: Publicar lista y Yota
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add latam_centroamerica_internacionales.m3u yota_publicidad.json reporte_actualizacion_iptv.txt
+
+          git add latam_centroamerica_internacionales.m3u
+          git add yota_publicidad.json
+          git add reporte_actualizacion_iptv.txt
+
           if git diff --cached --quiet; then
-            echo 'No hay cambios'
+            echo 'Sin cambios'
           else
-            git commit -m 'Ampliar IPTV LATAM y preparar canal Yota'
+            git commit -m 'Ampliar canales LATAM y preparar playlist de Yota'
             git pull --rebase origin main
             git push origin HEAD:main
           fi

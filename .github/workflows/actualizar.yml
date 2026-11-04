@@ -1,5 +1,4 @@
-
-name: Actualizar IPTV Nicaragua Centroamerica LATAM
+name: Actualizar IPTV Nicaragua Claro Tigo LATAM
 
 on:
   workflow_dispatch:
@@ -15,7 +14,7 @@ concurrency:
 
 jobs:
   actualizar:
-    name: Buscar y verificar canales
+    name: Buscar canales en espanol
     runs-on: ubuntu-latest
     timeout-minutes: 55
 
@@ -25,166 +24,198 @@ jobs:
         with:
           ref: main
 
-      - name: Preparar Python
+      - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Generar lista IPTV verificada
+      - name: Buscar y verificar canales
         shell: bash
         run: |
-          cat > actualizar_iptv_temp.py <<'PYTHON'
+          cat > /tmp/actualizar_iptv.py <<'PYTHON'
           import re
-          import math
           import time
           import ipaddress
           import urllib.request
           import urllib.parse
           from pathlib import Path
           from collections import defaultdict
-          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from concurrent.futures import (
+              ThreadPoolExecutor,
+              as_completed
+          )
 
-          # =====================================
-          # CONFIGURACION PRINCIPAL
-          # =====================================
+          # ===================================
+          # CONFIGURACION
+          # ===================================
 
           SALIDA = Path(
               "latam_centroamerica_internacionales.m3u"
           )
 
-          ORIGEN_CORS = "http://localhost:3000"
-          MAX_TRABAJADORES = 16
-          TIMEOUT = 9
-          MAX_OPCIONES = 4
-          MIN_RETENCION = 0.25
+          INFORME = Path(
+              "reporte_actualizacion_iptv.txt"
+          )
 
           BASE = "https://iptv-org.github.io/iptv"
 
-          # =====================================
-          # PAISES PRIORITARIOS
-          # =====================================
+          TRABAJADORES = 16
+          TIMEOUT = 8
+          MAX_ALTERNATIVAS = 3
 
-          CENTROAMERICA = {
-              "NI": "🇳🇮 Nicaragua",
-              "HN": "🇭🇳 Honduras",
-              "SV": "🇸🇻 El Salvador",
-              "GT": "🇬🇹 Guatemala",
-              "CR": "🇨🇷 Costa Rica",
-              "PA": "🇵🇦 Panamá",
-              "BZ": "🇧🇿 Belice",
-          }
+          # No sustituir enlaces antiguos
+          # sin revisar su reproduccion.
+          CONSERVAR_ANTERIORES = True
 
-          LATAM = {
-              "MX": "🇲🇽 México",
-              "AR": "🇦🇷 Argentina",
-              "BO": "🇧🇴 Bolivia",
-              "CL": "🇨🇱 Chile",
-              "CO": "🇨🇴 Colombia",
-              "EC": "🇪🇨 Ecuador",
-              "PE": "🇵🇪 Perú",
-              "PY": "🇵🇾 Paraguay",
-              "UY": "🇺🇾 Uruguay",
-              "VE": "🇻🇪 Venezuela",
-              "CU": "🇨🇺 Cuba",
-              "DO": "🇩🇴 República Dominicana",
-              "PR": "🇵🇷 Puerto Rico",
-              "HT": "🇭🇹 Haití",
-              "GY": "🇬🇾 Guyana",
-              "SR": "🇸🇷 Surinam",
-              "AW": "🇦🇼 Aruba",
-              "CW": "🇨🇼 Curazao",
-              "BQ": "🇧🇶 Caribe Neerlandés",
-              "SX": "🇸🇽 Sint Maarten",
-              "MF": "🇲🇫 San Martín",
-              "MQ": "🇲🇶 Martinica",
-              "GP": "🇬🇵 Guadalupe",
-              "GF": "🇬🇫 Guayana Francesa",
-              "BL": "🇧🇱 San Bartolomé",
-              "JM": "🇯🇲 Jamaica",
-              "TT": "🇹🇹 Trinidad y Tobago",
-              "BS": "🇧🇸 Bahamas",
-              "BB": "🇧🇧 Barbados",
-              "AG": "🇦🇬 Antigua y Barbuda",
-              "DM": "🇩🇲 Dominica",
-              "GD": "🇬🇩 Granada",
-              "KN": "🇰🇳 San Cristóbal y Nieves",
-              "LC": "🇱🇨 Santa Lucía",
-              "VC": "🇻🇨 San Vicente",
-              "KY": "🇰🇾 Islas Caimán",
-              "TC": "🇹🇨 Islas Turcas y Caicos",
-              "VG": "🇻🇬 Islas Vírgenes Británicas",
-              "VI": "🇻🇮 Islas Vírgenes EE.UU.",
-              "AI": "🇦🇮 Anguila",
-              "MS": "🇲🇸 Montserrat",
-          }
+          # ===================================
+          # PAISES PERMITIDOS
+          # ===================================
 
           PAISES = {
-              **CENTROAMERICA,
-              **LATAM,
+              "NI": "Nicaragua",
+              "HN": "Honduras",
+              "SV": "El Salvador",
+              "GT": "Guatemala",
+              "CR": "Costa Rica",
+              "PA": "Panamá",
+              "BZ": "Belice",
+              "MX": "México",
+              "AR": "Argentina",
+              "BO": "Bolivia",
+              "CL": "Chile",
+              "CO": "Colombia",
+              "EC": "Ecuador",
+              "PE": "Perú",
+              "PY": "Paraguay",
+              "UY": "Uruguay",
+              "VE": "Venezuela",
+              "CU": "Cuba",
+              "DO": "República Dominicana",
+              "PR": "Puerto Rico",
+              "HT": "Haití",
           }
 
-          ORDEN = {
-              codigo: posicion
-              for posicion, codigo in enumerate(PAISES)
-          }
-
-          INTERNACIONALES = "🌐 Internacionales"
-
-          # =====================================
-          # FUENTES IPTV
-          # =====================================
-
-          FUENTES = [
-              (f"{BASE}/index.m3u", None),
-              (f"{BASE}/index.country.m3u", None),
-              (f"{BASE}/regions/cenamer.m3u", None),
-              (f"{BASE}/regions/latam.m3u", None),
-              (f"{BASE}/regions/hispam.m3u", None),
-              (f"{BASE}/regions/carib.m3u", None),
+          CENTROAMERICA = [
+              "NI", "HN", "SV", "GT",
+              "CR", "PA", "BZ"
           ]
 
-          # Fuentes por pais
-          for codigo in PAISES:
-              FUENTES.append(
-                  (
-                      f"{BASE}/countries/{codigo.lower()}.m3u",
-                      codigo
-                  )
+          LATAM = [
+              "MX", "CO", "AR", "PE",
+              "CL", "EC", "VE", "BO",
+              "PY", "UY", "DO", "PR"
+          ]
+
+          # ===================================
+          # CANALES PRIORITARIOS
+          # ===================================
+
+          # Estos nombres ayudan a priorizar
+          # coincidencias con canales conocidos
+          # en television de Nicaragua y LATAM.
+          #
+          # No representan una lista oficial
+          # ni otorgan acceso a Claro o Tigo.
+
+          PRIORITARIOS = [
+              "canal 10",
+              "tn8",
+              "canal 13",
+              "viva nicaragua",
+              "canal 2",
+              "canal 4",
+              "canal 6",
+              "canal 8",
+              "canal 12",
+              "canal 14",
+              "telemundo",
+              "univision",
+              "tv azteca",
+              "azteca uno",
+              "azteca 7",
+              "las estrellas",
+              "canal 5",
+              "cnn en espanol",
+              "telesur",
+              "caracol",
+              "rcn",
+              "teleantioquia",
+              "tv peru",
+              "america television",
+              "latina",
+              "panamericana",
+          ]
+
+          # ===================================
+          # FUENTES DE BUSQUEDA
+          # ===================================
+
+          FUENTES = [
+              (f"{BASE}/languages/spa.m3u", None),
+              (f"{BASE}/regions/cenamer.m3u", None),
+              (f"{BASE}/regions/latam.m3u", None),
+              (f"{BASE}/index.country.m3u", None),
+          ]
+
+          for codigo in CENTROAMERICA + LATAM:
+              FUENTES.append((
+                  f"{BASE}/countries/{codigo.lower()}.m3u",
+                  codigo
+              ))
+
+          # ===================================
+          # UTILIDADES
+          # ===================================
+
+          def normalizar(valor):
+              import unicodedata
+
+              texto = unicodedata.normalize(
+                  "NFKD", str(valor or "")
               )
 
-          # =====================================
-          # SEGURIDAD DE DIRECCIONES
-          # =====================================
+              texto = "".join(
+                  c for c in texto
+                  if not unicodedata.combining(c)
+              )
 
-          def url_segura(direccion):
+              return re.sub(
+                  r"[^a-z0-9]+", " ",
+                  texto.lower()
+              ).strip()
+
+          def url_segura(url):
               try:
-                  u = urllib.parse.urlsplit(direccion)
-
-                  if u.scheme not in ("https", "http"):
-                      return False
-
-                  if not u.hostname or u.username or u.password:
-                      return False
-
-                  nombre = u.hostname.lower()
+                  p = urllib.parse.urlsplit(url)
 
                   if (
-                      nombre == "localhost"
-                      or nombre.endswith(".local")
-                      or nombre.endswith(".internal")
+                      p.scheme not in ("http", "https")
+                      or not p.hostname
+                      or p.username
+                      or p.password
+                  ):
+                      return False
+
+                  host = p.hostname.lower()
+
+                  if (
+                      host == "localhost"
+                      or host.endswith(".local")
+                      or host.endswith(".internal")
                   ):
                       return False
 
                   try:
-                      ip = ipaddress.ip_address(nombre)
+                      ip = ipaddress.ip_address(host)
                       return ip.is_global
+
                   except ValueError:
                       return True
 
               except Exception:
                   return False
 
-          class RedireccionSegura(
+          class RedirectSeguro(
               urllib.request.HTTPRedirectHandler
           ):
               def redirect_request(
@@ -193,7 +224,7 @@ jobs:
               ):
                   if not url_segura(newurl):
                       raise ValueError(
-                          "Redireccion no permitida"
+                          "Redireccion insegura"
                       )
 
                   return super().redirect_request(
@@ -202,33 +233,28 @@ jobs:
                   )
 
           ABRIDOR = urllib.request.build_opener(
-              RedireccionSegura()
+              RedirectSeguro()
           )
 
           def descargar(
               url,
               limite=500000,
-              cors=False,
-              segmento=False,
-              timeout=TIMEOUT
+              timeout=TIMEOUT,
+              segmento=False
           ):
               if not url_segura(url):
-                  raise ValueError("URL no segura")
+                  raise ValueError("URL no valida")
 
-              cabeceras = {
+              headers = {
                   "User-Agent": "Mozilla/5.0",
                   "Accept": "*/*",
               }
 
-              if cors:
-                  cabeceras["Origin"] = ORIGEN_CORS
-
               if segmento:
-                  cabeceras["Range"] = "bytes=0-2047"
+                  headers["Range"] = "bytes=0-2047"
 
               peticion = urllib.request.Request(
-                  url,
-                  headers=cabeceras
+                  url, headers=headers
               )
 
               with ABRIDOR.open(
@@ -236,67 +262,62 @@ jobs:
                   timeout=timeout
               ) as respuesta:
 
-                  destino = respuesta.geturl()
+                  final = respuesta.geturl()
 
-                  if not url_segura(destino):
+                  if not url_segura(final):
                       raise ValueError(
-                          "Destino no permitido"
+                          "Destino no valido"
                       )
 
-                  if cors:
-                      permitido = respuesta.headers.get(
-                          "Access-Control-Allow-Origin",
-                          ""
-                      )
-
-                      if permitido not in (
-                          "*",
-                          ORIGEN_CORS
-                      ):
-                          raise ValueError(
-                              "CORS no disponible"
-                          )
-
-                  contenido = respuesta.read(
+                  data = respuesta.read(
                       limite + 1
                   )
 
-                  if not contenido:
+                  if not data or len(data) > limite:
                       raise ValueError(
-                          "Respuesta vacia"
+                          "Respuesta vacia o excesiva"
                       )
 
-                  if len(contenido) > limite:
-                      raise ValueError(
-                          "Archivo demasiado grande"
-                      )
-
-                  if contenido.lstrip().lower().startswith(
+                  if data.lstrip().lower().startswith(
                       (b"<html", b"<!doctype")
                   ):
                       raise ValueError(
-                          "Se recibio HTML"
+                          "Respuesta HTML"
                       )
 
-                  return contenido, destino
+                  return data, final
 
-          # =====================================
-          # LECTURA DE LISTAS M3U
-          # =====================================
+          # ===================================
+          # LEER M3U
+          # ===================================
 
-          ATRIBUTO = re.compile(
+          ATRIBUTOS = re.compile(
               r'([\w-]+)="([^"]*)"'
           )
 
-          def leer_lista(datos):
+          def separar_extinf(linea):
+              dentro = False
+
+              for i, caracter in enumerate(linea):
+                  if caracter == '"':
+                      dentro = not dentro
+
+                  elif caracter == "," and not dentro:
+                      return (
+                          linea[:i],
+                          linea[i + 1:].strip()
+                      )
+
+              return None, None
+
+          def leer_m3u(datos):
               texto = datos.decode(
-                  "utf-8-sig",
-                  errors="replace"
+                  "utf-8-sig", errors="replace"
               )
 
               if not texto.lstrip().startswith("#EXTM3U"):
                   raise ValueError(
-                      "La fuente no es una lista M3U"
+                      "Lista M3U incorrecta"
                   )
 
               meta = None
@@ -305,17 +326,21 @@ jobs:
                   linea = original.strip()
 
                   if linea.startswith("#EXTINF:"):
-                      partes = linea.split(",", 1)
+                      izquierda, nombre = (
+                          separar_extinf(linea)
+                      )
 
-                      if len(partes) != 2:
+                      if not izquierda or not nombre:
                           meta = None
                           continue
 
                       meta = {
-                          "nombre": partes[1].strip(),
+                          "nombre": nombre,
                           "atributos": dict(
-                              ATRIBUTO.findall(partes[0])
-                          ),
+                              ATRIBUTOS.findall(
+                                  izquierda
+                              )
+                          )
                       }
 
                   elif (
@@ -326,134 +351,138 @@ jobs:
                       if url_segura(linea):
                           yield {
                               **meta,
-                              "url": linea,
+                              "url": linea
                           }
 
                       meta = None
 
-          # =====================================
-          # CLASIFICAR PAISES
-          # =====================================
+          # ===================================
+          # CLASIFICAR CANALES
+          # ===================================
 
-          def pais_canal(canal, pais_fuente=None):
+          def pais_de(canal, origen=None):
               a = canal["atributos"]
 
-              identificador = a.get(
+              tvgid = a.get(
                   "tvg-id", ""
               ).split("@")[0]
 
-              coincidencia = re.search(
+              encontrado = re.search(
                   r"\.([a-z]{2})$",
-                  identificador,
+                  tvgid,
                   re.I
               )
 
               codigo = (
-                  coincidencia.group(1).upper()
-                  if coincidencia
-                  else ""
+                  encontrado.group(1).upper()
+                  if encontrado else ""
               )
 
               etiquetas = set(
                   re.split(
-                      r"[,; /]+",
-                      a.get("tvg-country", "").upper()
+                      r"[,;/\s]+",
+                      a.get(
+                          "tvg-country", ""
+                      ).upper()
                   )
               )
 
-              grupo = a.get(
-                  "group-title", ""
-              ).lower()
+              grupo = normalizar(
+                  a.get("group-title", "")
+              )
 
               if (
                   codigo == "BR"
                   or "BR" in etiquetas
-                  or "brazil" in grupo
                   or "brasil" in grupo
-                  or pais_fuente == "BR"
+                  or "brazil" in grupo
               ):
                   return None
 
               if codigo in PAISES:
                   return codigo
 
-              for c, titulo in PAISES.items():
-                  limpio = re.sub(
-                      r"^[^\w]+", "", titulo
-                  ).strip().lower()
-
-                  if c in etiquetas or grupo == limpio:
+              for c in PAISES:
+                  if c in etiquetas:
                       return c
 
-              if pais_fuente in PAISES:
-                  return pais_fuente
+              for c, nombre in PAISES.items():
+                  if grupo == normalizar(nombre):
+                      return c
 
-              if re.search(
-                  r"\b(internacional|international|"
-                  r"world|global)\b",
-                  grupo + " " + canal["nombre"],
-                  re.I
+              if origen in PAISES:
+                  return origen
+
+              if (
+                  origen is None
+                  and a.get(
+                      "tvg-language", ""
+                  ).lower() in (
+                      "spa", "es", "espanol",
+                      "español", "spanish"
+                  )
               ):
                   return "INT"
 
               return None
 
-          # =====================================
-          # DEDUPLICAR CANALES
-          # =====================================
+          def nombre_clave(canal):
+              a = canal["atributos"]
 
-          def clave_canal(canal):
-              identificador = canal[
-                  "atributos"
-              ].get("tvg-id", "")
+              identificador = a.get(
+                  "tvg-id", ""
+              ).split("@")[0]
 
               if identificador:
-                  return identificador.lower()
+                  return normalizar(
+                      identificador
+                  )
 
               nombre = re.sub(
                   r"\s*\((?:\d{3,4}[pi]|"
-                  r"hd|sd|fhd|4k)\)",
+                  r"hd|sd|fhd|uhd|4k)\)",
                   "",
                   canal["nombre"],
                   flags=re.I
               )
 
-              nombre = re.sub(
-                  r"[^a-z0-9]",
-                  "",
-                  nombre.lower()
+              return normalizar(nombre)
+
+          def clave(canal):
+              return (
+                  canal["pais"],
+                  nombre_clave(canal)
               )
 
-              return nombre
-
-          def calidad(canal):
-              coincidencia = re.search(
-                  r"\((\d{3,4})[pi]\)",
-                  canal["nombre"],
-                  re.I
+          def prioridad(canal):
+              nombre = normalizar(
+                  canal["nombre"]
               )
 
-              resolucion = (
-                  int(coincidencia.group(1))
-                  if coincidencia
-                  else 0
+              destacado = any(
+                  normalizar(p) in nombre
+                  for p in PRIORITARIOS
               )
 
               return (
-                  canal["url"].startswith("https://"),
-                  resolucion
+                  canal["pais"] == "NI",
+                  canal["pais"] in CENTROAMERICA,
+                  destacado,
+                  canal["url"].startswith(
+                      "https://"
+                  )
               )
 
-          # =====================================
+          # ===================================
           # VERIFICAR HLS
-          # =====================================
+          # ===================================
 
-          def verificar_hls(
+          def comprobar_hls(
               url,
-              profundidad=0,
+              nivel=0,
               visitados=None
           ):
-              if profundidad > 3:
+              if nivel > 3:
                   return False
 
               visitados = set(
@@ -467,34 +496,31 @@ jobs:
 
               try:
                   datos, final = descargar(
-                      url,
-                      limite=450000,
-                      cors=True
-                  )
-
-                  texto = datos.decode(
-                      "utf-8-sig",
-                      errors="replace"
+                      url, limite=400000
                   )
 
                   lineas = [
                       x.strip()
-                      for x in texto.splitlines()
+                      for x in datos.decode(
+                          "utf-8-sig",
+                          errors="replace"
+                      ).splitlines()
                       if x.strip()
                   ]
 
                   if (
                       not lineas
                       or lineas[0] != "#EXTM3U"
-                      or not any(
-                          "#EXT-X-" in x
-                          for x in lineas
-                      )
                   ):
                       return False
 
-                  # No importar DRM ni claves
-                  # de cifrado externas
+                  if not any(
+                      x.startswith("#EXT-X-")
+                      for x in lineas
+                  ):
+                      return False
+
+                  # No intentar eludir DRM
                   for linea in lineas:
                       if linea.startswith(
                           "#EXT-X-KEY:"
@@ -508,69 +534,67 @@ jobs:
                       if linea.startswith(
                           "#EXT-X-STREAM-INF:"
                       ):
-                          for siguiente in lineas[i + 1:]:
+                          siguientes = lineas[i + 1:]
+
+                          for siguiente in siguientes:
                               if not siguiente.startswith("#"):
                                   variantes.append(
                                       urllib.parse.urljoin(
-                                          final,
-                                          siguiente
+                                          final, siguiente
                                       )
                                   )
                                   break
 
                   if variantes:
-                      return any(
-                          verificar_hls(
+                      for alternativa in variantes[:3]:
+                          if comprobar_hls(
                               alternativa,
-                              profundidad + 1,
+                              nivel + 1,
                               visitados
-                          )
-                          for alternativa in variantes[:3]
-                      )
+                          ):
+                              return True
+
+                      return False
 
                   if not any(
-                      linea.startswith("#EXTINF:")
-                      for linea in lineas
+                      x.startswith("#EXTINF:")
+                      for x in lineas
                   ):
                       return False
 
-                  # Comprobar inicializacion fMP4
+                  # Verificar inicializacion fMP4
                   for linea in lineas:
-                      if linea.startswith("#EXT-X-MAP:"):
-                          coincidencia = re.search(
+                      if linea.startswith(
+                          "#EXT-X-MAP:"
+                      ):
+                          m = re.search(
                               r'URI="([^"]+)"',
                               linea
                           )
 
-                          if coincidencia:
+                          if m:
                               descargar(
                                   urllib.parse.urljoin(
-                                      final,
-                                      coincidencia.group(1)
+                                      final, m.group(1)
                                   ),
                                   limite=2048,
-                                  cors=True,
                                   segmento=True
                               )
 
                   segmentos = [
-                      linea
-                      for linea in lineas
-                      if not linea.startswith("#")
+                      x for x in lineas
+                      if not x.startswith("#")
                   ]
 
-                  # Probar ultimos segmentos
                   for segmento in reversed(
                       segmentos[-3:]
                   ):
                       try:
                           descargar(
                               urllib.parse.urljoin(
-                                  final,
-                                  segmento
+                                  final, segmento
                               ),
                               limite=2048,
-                              cors=True,
                               segmento=True
                           )
                           return True
@@ -578,58 +602,173 @@ jobs:
                       except Exception:
                           continue
 
-                  return False
-
               except Exception:
                   return False
 
-          def revisar_grupo(elemento):
-              clave, opciones = elemento
+              return False
 
-              for canal in opciones[:MAX_OPCIONES]:
-                  if verificar_hls(canal["url"]):
+          def verificar_grupo(grupo):
+              _, opciones = grupo
+
+              for canal in opciones[
+                  :MAX_ALTERNATIVAS
+              ]:
+                  if comprobar_hls(canal["url"]):
                       return canal
 
               return None
 
-          # =====================================
+          # ===================================
+          # PROTEGER CANALES ANTERIORES
+          # ===================================
+
+          def leer_anteriores():
+              if not SALIDA.exists():
+                  return []
+
+              try:
+                  datos = SALIDA.read_bytes()
+                  anteriores = []
+
+                  for canal in leer_m3u(datos):
+                      grupo = normalizar(
+                          canal["atributos"].get(
+                              "group-title", ""
+                          )
+                      )
+
+                      pais = None
+
+                      for codigo, nombre in PAISES.items():
+                          if (
+                              grupo == normalizar(nombre)
+                              or grupo.endswith(
+                                  " " + normalizar(nombre)
+                              )
+                          ):
+                              pais = codigo
+                              break
+
+                      if pais is None:
+                          if "internacional" in grupo:
+                              pais = "INT"
+
+                      if pais:
+                          canal["pais"] = pais
+                          anteriores.append(canal)
+
+                  return anteriores
+
+              except Exception as error:
+                  print(
+                      "AVISO: lista anterior:",
+                      error
+                  )
+                  return []
+
+          # ===================================
+          # GENERAR LISTA FINAL
+          # ===================================
+
+          def generar_m3u(canales):
+              lineas = ["#EXTM3U"]
+
+              for canal in canales:
+                  pais = canal["pais"]
+
+                  categoria = (
+                      "Internacionales"
+                      if pais == "INT"
+                      else PAISES[pais]
+                  )
+
+                  a = canal["atributos"]
+
+                  datos = ["-1"]
+
+                  for campo in (
+                      "tvg-id",
+                      "tvg-name",
+                      "tvg-logo"
+                  ):
+                      valor = a.get(
+                          campo, ""
+                      ).replace('"', "")
+
+                      if valor:
+                          datos.append(
+                              f'{campo}="{valor}"'
+                          )
+
+                  datos.append(
+                      f'group-title="{categoria}"'
+                  )
+
+                  nombre = (
+                      canal["nombre"]
+                      .replace("\r", " ")
+                      .replace("\n", " ")
+                  )
+
+                  lineas.append(
+                      "#EXTINF:" +
+                      " ".join(datos) +
+                      "," + nombre
+                  )
+
+                  lineas.append(
+                      canal["url"]
+                  )
+
+              return "\n".join(lineas) + "\n"
+
+          # ===================================
           # PROCESO PRINCIPAL
-          # =====================================
+          # ===================================
 
           def principal():
+              inicio = time.monotonic()
+
               print(
-                  "\n📺 ACTUALIZACION IPTV",
-                  flush=True
+                  "\nACTUALIZACION IPTV NICARAGUA"
               )
 
               print(
-                  "Nicaragua + Centroamerica + LATAM",
+                  "Busqueda de canales "
+                  "en espanol y LATAM"
+              )
+
+              anteriores = leer_anteriores()
+
+              print(
+                  "Canales anteriores:",
+                  len(anteriores),
                   flush=True
               )
 
               grupos = defaultdict(list)
-              fuentes_correctas = 0
-              total_entradas = 0
+              urls_entrada = set()
+              fuentes_ok = 0
 
-              for url, pais_fuente in FUENTES:
+              for url, origen in FUENTES:
                   try:
                       datos, _ = descargar(
                           url,
                           limite=20000000,
-                          timeout=35
+                          timeout=30
                       )
 
                       lista = list(
-                          leer_lista(datos)
+                          leer_m3u(datos)
                       )
 
-                      fuentes_correctas += 1
-                      total_entradas += len(lista)
+                      fuentes_ok += 1
+
+                      aceptados = 0
 
                       for canal in lista:
-                          pais = pais_canal(
-                              canal,
-                              pais_fuente
+                          pais = pais_de(
+                              canal, origen
                           )
 
                           if not pais:
@@ -637,279 +776,259 @@ jobs:
 
                           canal["pais"] = pais
 
-                          clave = (
-                              pais,
-                              clave_canal(canal)
+                          llave_url = (
+                              pais, canal["url"]
                           )
 
-                          grupos[clave].append(canal)
+                          if llave_url in urls_entrada:
+                              continue
+
+                          urls_entrada.add(llave_url)
+
+                          grupos[
+                              clave(canal)
+                          ].append(canal)
+
+                          aceptados += 1
 
                       print(
-                          f"FUENTE OK: {len(lista)} "
-                          f"entradas - {url}",
+                          "FUENTE OK:",
+                          aceptados,
+                          url,
                           flush=True
                       )
 
                   except Exception as error:
                       print(
-                          f"AVISO: {url}: {error}",
+                          "FUENTE ERROR:",
+                          url,
+                          str(error)[:120],
                           flush=True
                       )
 
-              if not fuentes_correctas or not grupos:
+              if fuentes_ok == 0 or not grupos:
                   raise RuntimeError(
-                      "No se descargaron canales. "
+                      "No se encontraron fuentes. "
                       "Se conserva la lista anterior."
                   )
 
-              print(
-                  f"\nFuentes exitosas: "
-                  f"{fuentes_correctas}/{len(FUENTES)}"
-              )
-
-              print(
-                  f"Entradas encontradas: {total_entradas}"
-              )
+              # Priorizar Nicaragua y canales
+              # conocidos en television LATAM.
 
               trabajos = []
 
-              for clave, opciones in grupos.items():
-                  unicas = {}
-
-                  for canal in opciones:
-                      unicas.setdefault(
-                          canal["url"],
-                          canal
-                      )
-
-                  ordenadas = sorted(
-                      unicas.values(),
-                      key=calidad,
+              for k, opciones in grupos.items():
+                  opciones.sort(
+                      key=prioridad,
                       reverse=True
                   )
 
                   trabajos.append(
-                      (clave, ordenadas)
+                      (k, opciones)
                   )
 
               print(
-                  f"Canales distintos: {len(trabajos)}",
+                  "Canales candidatos:",
+                  len(trabajos),
                   flush=True
               )
 
-              comprobados = 0
-              validos = []
+              nuevos_verificados = []
 
               with ThreadPoolExecutor(
-                  max_workers=MAX_TRABAJADORES
+                  max_workers=TRABAJADORES
               ) as executor:
 
                   futuros = [
                       executor.submit(
-                          revisar_grupo,
-                          trabajo
+                          verificar_grupo,
+                          grupo
                       )
-                      for trabajo in trabajos
+                      for grupo in trabajos
                   ]
 
-                  for futuro in as_completed(futuros):
-                      comprobados += 1
+                  revisados = 0
 
-                      resultado = futuro.result()
+                  for futuro in as_completed(
+                      futuros
+                  ):
+                      revisados += 1
 
-                      if resultado:
-                          validos.append(resultado)
+                      canal = futuro.result()
+
+                      if canal:
+                          nuevos_verificados.append(
+                              canal
+                          )
 
                       if (
-                          comprobados % 100 == 0
-                          or comprobados == len(futuros)
+                          revisados % 100 == 0
+                          or revisados == len(futuros)
                       ):
                           print(
-                              f"Verificados: "
-                              f"{comprobados}/{len(futuros)} "
-                              f"| HLS candidatos: "
-                              f"{len(validos)}",
+                              "Revisados:",
+                              revisados,
+                              "/",
+                              len(futuros),
+                              "| HLS:",
+                              len(nuevos_verificados),
                               flush=True
                           )
 
-              # =================================
-              # PROTEGER LISTA ANTERIOR
-              # =================================
+              # Mantener primero los enlaces
+              # que ya estaban publicados.
 
-              anteriores = 0
+              finales = []
+              claves = set()
+              urls = set()
 
-              if SALIDA.exists():
-                  anteriores = sum(
-                      1
-                      for linea in SALIDA.read_text(
-                          encoding="utf-8-sig"
-                      ).splitlines()
-                      if linea.startswith("#EXTINF:")
-                  )
+              def agregar(canal):
+                  k = clave(canal)
 
-              minimo = (
-                  max(
-                      10,
-                      math.ceil(
-                          anteriores * MIN_RETENCION
-                      )
-                  )
-                  if anteriores
-                  else 10
-              )
+                  if (
+                      k in claves
+                      or canal["url"] in urls
+                  ):
+                      return False
 
-              if len(validos) < minimo:
+                  claves.add(k)
+                  urls.add(canal["url"])
+                  finales.append(canal)
+
+                  return True
+
+              conservados = 0
+              incorporados = 0
+
+              if CONSERVAR_ANTERIORES:
+                  for canal in anteriores:
+                      if agregar(canal):
+                          conservados += 1
+
+              for canal in nuevos_verificados:
+                  if agregar(canal):
+                      incorporados += 1
+
+              if len(finales) < 10:
                   raise RuntimeError(
-                      f"Solo {len(validos)} "
-                      f"canales verificados. "
-                      f"Minimo de seguridad: {minimo}. "
-                      "No se reemplaza la lista."
+                      "Demasiados pocos canales. "
+                      "No se modifica la lista."
                   )
 
-              # =================================
-              # GENERAR M3U SIN DUPLICADOS
-              # =================================
+              # Evitar que un fallo temporal
+              # quite los canales anteriores.
 
-              validos.sort(
+              if (
+                  anteriores
+                  and len(finales)
+                  < len(anteriores) * 0.90
+              ):
+                  raise RuntimeError(
+                      "Caida considerable del catalogo. "
+                      "Se conserva el archivo anterior."
+                  )
+
+              orden = {
+                  codigo: indice
+                  for indice, codigo
+                  in enumerate(PAISES)
+              }
+
+              finales.sort(
                   key=lambda canal: (
-                      ORDEN.get(
-                          canal["pais"],
-                          999
+                      orden.get(
+                          canal["pais"], 999
                       ),
                       canal["nombre"].lower()
                   )
               )
 
-              finales = []
-              urls = set()
-
-              for canal in validos:
-                  if canal["url"] in urls:
-                      continue
-
-                  urls.add(canal["url"])
-                  finales.append(canal)
-
-              contenido = ["#EXTM3U"]
-
-              for canal in finales:
-                  pais = canal["pais"]
-
-                  categoria = (
-                      INTERNACIONALES
-                      if pais == "INT"
-                      else PAISES[pais]
-                  )
-
-                  atributos = canal["atributos"]
-
-                  propiedades = [
-                      '-1'
-                  ]
-
-                  for atributo in (
-                      "tvg-id",
-                      "tvg-name",
-                      "tvg-logo"
-                  ):
-                      valor = atributos.get(
-                          atributo, ""
-                      ).replace('"', "")
-
-                      if valor:
-                          propiedades.append(
-                              f'{atributo}="{valor}"'
-                          )
-
-                  propiedades.append(
-                      f'group-title="{categoria}"'
-                  )
-
-                  nombre = canal[
-                      "nombre"
-                  ].replace("\n", " ").replace(
-                      "\r", " "
-                  )
-
-                  contenido.append(
-                      "#EXTINF:" +
-                      " ".join(propiedades) +
-                      "," + nombre
-                  )
-
-                  contenido.append(
-                      canal["url"]
-                  )
-
               SALIDA.write_text(
-                  "\n".join(contenido) + "\n",
+                  generar_m3u(finales),
+                  encoding="utf-8"
+              )
+
+              resumen = [
+                  "ACTUALIZACION IPTV",
+                  "======================",
+                  f"Fuentes correctas: {fuentes_ok}",
+                  f"Candidatos: {len(trabajos)}",
+                  f"Anteriores: {len(anteriores)}",
+                  f"Conservados: {conservados}",
+                  f"HLS comprobados: "
+                  f"{len(nuevos_verificados)}",
+                  f"Incorporados: {incorporados}",
+                  f"Total publicado: {len(finales)}",
+                  "",
+              ]
+
+              for codigo, nombre in PAISES.items():
+                  cantidad = sum(
+                      c["pais"] == codigo
+                      for c in finales
+                  )
+
+                  if cantidad:
+                      resumen.append(
+                          f"{nombre}: {cantidad}"
+                      )
+
+              internacionales = sum(
+                  c["pais"] == "INT"
+                  for c in finales
+              )
+
+              if internacionales:
+                  resumen.append(
+                      "Internacionales: "
+                      f"{internacionales}"
+                  )
+
+              resumen.append(
+                  f"Duracion: "
+                  f"{round(time.monotonic()-inicio)} s"
+              )
+
+              INFORME.write_text(
+                  "\n".join(resumen) + "\n",
                   encoding="utf-8"
               )
 
               print(
-                  "\n========== RESULTADOS =========="
-              )
-
-              print(
-                  f"Canales anteriores: {anteriores}"
-              )
-
-              print(
-                  f"Canales nuevos verificados: "
-                  f"{len(finales)}"
-              )
-
-              for pais in list(PAISES) + ["INT"]:
-                  cantidad = sum(
-                      1
-                      for canal in finales
-                      if canal["pais"] == pais
-                  )
-
-                  if cantidad:
-                      titulo = (
-                          INTERNACIONALES
-                          if pais == "INT"
-                          else PAISES[pais]
-                      )
-
-                      print(
-                          f"{titulo}: {cantidad}"
-                      )
-
-              print(
-                  "\n✅ LISTA M3U GENERADA",
+                  "\n".join(resumen),
                   flush=True
               )
 
               print(
-                  "IMPORTANTE: La comprobacion "
-                  "no garantiza reproduccion "
-                  "desde Nicaragua o Chrome."
+                  "\nLISTA GENERADA CORRECTAMENTE"
+              )
+
+              print(
+                  "NOTA: Los canales conservados "
+                  "no se vuelven a verificar. "
+                  "HLS OK tampoco garantiza "
+                  "reproduccion en Chrome."
               )
 
           if __name__ == "__main__":
               principal()
           PYTHON
 
-          python actualizar_iptv_temp.py
+          python /tmp/actualizar_iptv.py
 
-      - name: Limpiar script temporal
-        if: always()
-        run: rm -f actualizar_iptv_temp.py
-
-      - name: Publicar lista actualizada
+      - name: Publicar lista e informe
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add latam_centroamerica_internacionales.m3u
+          git add reporte_actualizacion_iptv.txt
 
           if git diff --cached --quiet; then
-            echo "No hay cambios en la lista"
+            echo "No hay cambios para publicar"
           else
-            git commit -m "Actualizar canales Nicaragua Centroamerica LATAM"
+            git commit -m "Actualizar IPTV espanol Nicaragua LATAM"
             git pull --rebase origin main
             git push origin HEAD:main
           fi

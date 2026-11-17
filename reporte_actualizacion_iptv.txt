@@ -1,9 +1,9 @@
 Fuentes descargadas: 24/24
-Canales anteriores conservados: 1624
-Candidatos revisados: 1093
-Candidatos HLS: 6
-Canales nuevos: 6
-Total en M3U: 1630
+Canales anteriores conservados: 1629
+Candidatos revisados: 1094
+Candidatos HLS: 13
+Canales nuevos: 13
+Total en M3U: 1642
 Yota TV: playlist configurada;
 integracion web pendiente
 Aviso: HLS comprobado no garantiza imagen en Chrome ni permisos de redistribucion.
